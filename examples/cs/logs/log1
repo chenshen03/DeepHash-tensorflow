@@ -1,0 +1,33 @@
+Namespace(R=54000, batch_size=256, code_batch_size=500, cq_lambda=0.0001, data_root='../../data/cifar10', dataset='cifar10', decay_step=500, finetune_all=True, gpu=0, img_db='../../data/cifar10/database.txt', img_model='alexnet', img_te='../../data/cifar10/test.txt', img_tr='../../data/cifar10/train.txt', label_dim=10, learning_rate=0.002, learning_rate_decay_factor=0.5, log_dir='tflog', max_iter=5000, max_iter_update_Cb=1, max_iter_update_b=3, model_weights='../../DeepHash/architecture/pretrained_model/reference_pretrain.npy', n_subcenter=256, n_subspace=4, output_dim=64, save_dir='./models/', val_batch_size=100)
+initializing
+launching session
+loading img model from ../../DeepHash/architecture/pretrained_model/reference_pretrain.npy
+['hash_layer', 'fc6', 'fc7', 'conv3', 'conv2', 'conv1', 'conv5', 'conv4']
+img model loading finished
+Initializing Dataset
+Dataset already
+2019-05-17 16:08:53.672462 #train# start training
+2019-05-17 16:09:06.243862 #train# epoch  0 step    1, loss = 1.5409, 7.1 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:10:16.135247 #train# epoch  1 step   51, loss = 0.9833, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:11:25.327262 #train# epoch  2 step  101, loss = 0.9790, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:12:32.849940 #train# epoch  3 step  151, loss = 0.9776, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish

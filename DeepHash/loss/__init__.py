@@ -2,6 +2,29 @@ import tensorflow as tf
 from distance.tfversion import distance
 
 
+def cosine_loss(self, u, label_u):
+    ''' 
+    DQN
+    Param: 
+    Return: 
+    '''
+    with tf.name_scope('cosine_loss'):
+        def reduce_shaper(t):
+            return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
+
+        # let sim = {0, 1} to be {-1, 1}
+        Sim_1 = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
+        Sim_2 = tf.add(Sim_1, tf.constant(-0.5))
+        Sim = tf.multiply(Sim_2, tf.constant(2.0))
+
+        ip_1 = tf.matmul(u, u, transpose_b=True)
+        mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)), reduce_shaper(
+            tf.square(u)), transpose_b=True))
+        cos_1 = tf.div(ip_1, mod_1)
+        loss = tf.reduce_mean(tf.square(tf.subtract(Sim, cos_1)))
+        return loss
+
+
 def cross_entropy(u, label_u, alpha=0.5, normed=False):
     ''' 
     DHN
@@ -32,7 +55,8 @@ def cross_entropy(u, label_u, alpha=0.5, normed=False):
     else:
         ip = tf.clip_by_value(tf.matmul(u, tf.transpose(u)), -1.5e1, 1.5e1)
     ones = tf.ones([tf.shape(u)[0], tf.shape(u)[0]])
-    return tf.reduce_mean(tf.multiply(tf.log(ones + tf.exp(alpha * ip)) - s * alpha * ip, balance_param))
+    loss = tf.reduce_mean(tf.multiply(tf.log(ones + tf.exp(alpha * ip)) - s * alpha * ip, balance_param))
+    return loss
 
 
 def cauchy_cross_entropy(u, label_u, output_dim=300, v=None, label_v=None, gamma=1, normed=True):
@@ -83,7 +107,8 @@ def cauchy_cross_entropy(u, label_u, output_dim=300, v=None, label_v=None, gamma
         tf.log(cauchy_mask) - (tf.constant(1.0) - s_mask) * \
         tf.log(tf.constant(1.0) - cauchy_mask)
 
-    return tf.reduce_mean(tf.multiply(all_loss, balance_p_mask))
+    loss = tf.reduce_mean(tf.multiply(all_loss, balance_p_mask))
+    return loss
 
 
 def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
@@ -112,8 +137,8 @@ def simple_quantization_loss(z):
     Return: 
     '''
     with tf.name_scope('simple_quantization_loss'):
-        q_loss = tf.reduce_mean(tf.square(tf.subtract(tf.abs(z), tf.constant(1.0))))
-    return q_loss
+        loss = tf.reduce_mean(tf.square(tf.subtract(tf.abs(z), tf.constant(1.0))))
+    return loss
 
 
 def quantization_loss(z, h, C):
@@ -123,8 +148,8 @@ def quantization_loss(z, h, C):
     Return: 
     '''
     with tf.name_scope('quantization_loss'):
-        q_loss = tf.reduce_mean(tf.reduce_sum(z - tf.matmul(h, C), -1))
-    return q_loss
+        loss = tf.reduce_mean(tf.reduce_sum(z - tf.matmul(h, C), -1))
+    return loss
 
 
 def square_quantization_loss(z, h, C):
@@ -134,6 +159,6 @@ def square_quantization_loss(z, h, C):
     Return: 
     '''
     with tf.name_scope('square_quantization_loss'):
-        q_loss = tf.reduce_mean(tf.reduce_sum(tf.square(z - tf.matmul(h, C)), 1))
-    return q_loss
+        loss = tf.reduce_mean(tf.reduce_sum(tf.square(z - tf.matmul(h, C)), 1))
+    return loss
 
