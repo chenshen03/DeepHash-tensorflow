@@ -18,6 +18,7 @@ from sklearn.cluster import MiniBatchKMeans
 from architecture import img_alexnet_layers
 from evaluation import MAPs_CQ
 from .util import Dataset
+from loss import cosine_loss, square_quantization_loss
 
 
 class DQN(object):
@@ -163,28 +164,10 @@ class DQN(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-
-        # let sim = {0, 1} to be {-1, 1}
-        Sim_1 = tf.clip_by_value(
-            tf.matmul(self.img_label, tf.transpose(self.img_label)), 0.0, 1.0)
-        Sim_2 = tf.add(Sim_1, tf.constant(-0.5))
-        Sim = tf.multiply(Sim_2, tf.constant(2.0))
-
-        ip_1 = tf.matmul(self.img_last_layer,
-                         self.img_last_layer, transpose_b=True)
-
-        def reduce_shaper(t):
-            return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
-        mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(self.img_last_layer)), reduce_shaper(
-            tf.square(self.img_last_layer)), transpose_b=True))
-        cos_1 = tf.div(ip_1, mod_1)
-        self.cos_loss = tf.reduce_mean(tf.square(tf.subtract(Sim, cos_1)))
-
-        self.cq_loss_img = tf.reduce_mean(tf.reduce_sum(
-            tf.square(tf.subtract(self.img_last_layer, tf.matmul(self.b_img, self.C))), 1))
+        self.cos_loss = cosine_loss(self.img_last_layer, self.img_label)
+        self.q_loss = square_quantization_loss(self.img_last_layer, self.b_img, self.C)
         self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
-        self.cq_loss = tf.multiply(self.q_lambda, self.cq_loss_img)
-        self.loss = self.cos_loss + self.cq_loss
+        self.loss = self.cos_loss + self.q_lambda * self.q_loss
 
         # Last layer has a 10 times learning rate
         self.lr = tf.train.exponential_decay(
@@ -198,8 +181,8 @@ class DQN(object):
         # for debug
         self.grads_and_vars = grads_and_vars
         tf.summary.scalar('loss', self.loss)
-        tf.summary.scalar('cos_loss', self.cos_loss)
-        tf.summary.scalar('cq_loss', self.cq_loss)
+        tf.summary.scalar('cosine_loss', self.cos_loss)
+        tf.summary.scalar('quantization_loss', self.q_loss)
         tf.summary.scalar('lr', self.lr)
         self.merged = tf.summary.merge_all()
 

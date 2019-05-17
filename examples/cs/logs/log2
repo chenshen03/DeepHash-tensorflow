@@ -1,0 +1,5 @@
+Namespace(R=54000, batch_size=256, code_batch_size=500, cq_lambda=0.0001, data_root='../../data/cifar10', dataset='cifar10', decay_step=500, finetune_all=True, gpu=0, img_db='../../data/cifar10/database.txt', img_model='alexnet', img_te='../../data/cifar10/test.txt', img_tr='../../data/cifar10/train.txt', label_dim=10, learning_rate=0.002, learning_rate_decay_factor=0.5, log_dir='tflog', max_iter=5000, max_iter_update_Cb=1, max_iter_update_b=3, model_weights='../../DeepHash/architecture/pretrained_model/reference_pretrain.npy', n_subcenter=256, n_subspace=4, output_dim=64, save_dir='./models/', val_batch_size=100)
+initializing
+launching session
+loading img model from ./models/lr0.002_cq0.0001_ss4_sc256_d64_cifar10.npy
+['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8', 'C']

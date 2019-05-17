@@ -60,7 +60,7 @@ def main(config):
     model_weights = model.train(train_img, config)
     config.model_weights = model_weights
     
-#     config.model_weights = './models/lr0.002_cq0.0001_ss4_sc128_d64_cifar10.npy'
+#     config.model_weights = './models/lr0.002_cq0.0001_ss4_sc256_d64_cifar10.npy'
     query_img, database_img = dataset.import_validation(data_root, config.img_te, config.img_db)
     maps = model.validation(database_img, query_img, config)
 

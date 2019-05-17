@@ -31,3 +31,723 @@ step:  0  finish
 step:  1  finish
 step:  2  finish
 step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:13:45.903326 #train# epoch  5 step  201, loss = 0.9461, 1.1 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:14:52.853120 #train# epoch  6 step  251, loss = 0.9421, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:15:58.562687 #train# epoch  7 step  301, loss = 0.9311, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:17:05.801098 #train# epoch  8 step  351, loss = 0.9274, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:18:17.492806 #train# epoch 10 step  401, loss = 0.9194, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:19:22.832580 #train# epoch 11 step  451, loss = 0.8923, 1.1 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:20:27.643353 #train# epoch 12 step  501, loss = 0.9023, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:21:32.355783 #train# epoch 13 step  551, loss = 0.8924, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:22:44.438707 #train# epoch 15 step  601, loss = 0.8733, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:23:51.091038 #train# epoch 16 step  651, loss = 0.8710, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:24:57.327401 #train# epoch 17 step  701, loss = 0.8748, 1.1 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:26:05.442073 #train# epoch 18 step  751, loss = 0.8825, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:27:21.482148 #train# epoch 20 step  801, loss = 0.8789, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:28:32.922827 #train# epoch 21 step  851, loss = 0.8701, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:29:42.576344 #train# epoch 22 step  901, loss = 0.8411, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:30:53.716410 #train# epoch 23 step  951, loss = 0.8532, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:32:08.978605 #train# epoch 25 step 1001, loss = 0.8704, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:33:20.862898 #train# epoch 26 step 1051, loss = 0.8535, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:34:30.348572 #train# epoch 27 step 1101, loss = 0.8631, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:35:38.078385 #train# epoch 28 step 1151, loss = 0.8658, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:36:50.887007 #train# epoch 30 step 1201, loss = 0.8698, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:37:58.471199 #train# epoch 31 step 1251, loss = 0.8602, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:39:06.689218 #train# epoch 32 step 1301, loss = 0.8387, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:40:14.564367 #train# epoch 33 step 1351, loss = 0.8695, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:41:28.293976 #train# epoch 35 step 1401, loss = 0.8406, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:42:36.234589 #train# epoch 36 step 1451, loss = 0.8460, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:43:45.086597 #train# epoch 37 step 1501, loss = 0.8582, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:44:51.902636 #train# epoch 38 step 1551, loss = 0.8349, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:46:06.723208 #train# epoch 40 step 1601, loss = 0.8617, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:47:14.326958 #train# epoch 41 step 1651, loss = 0.8339, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:48:23.636128 #train# epoch 42 step 1701, loss = 0.8440, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:49:32.188224 #train# epoch 43 step 1751, loss = 0.8556, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:50:44.148008 #train# epoch 45 step 1801, loss = 0.8379, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:51:55.095092 #train# epoch 46 step 1851, loss = 0.8336, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:53:04.651363 #train# epoch 47 step 1901, loss = 0.8655, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:54:13.828118 #train# epoch 48 step 1951, loss = 0.8488, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:55:30.664367 #train# epoch 50 step 2001, loss = 0.8285, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:56:45.068330 #train# epoch 51 step 2051, loss = 0.8343, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:57:56.068995 #train# epoch 52 step 2101, loss = 0.8416, 1.2 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 16:59:07.328149 #train# epoch 53 step 2151, loss = 0.8563, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:00:27.050428 #train# epoch 55 step 2201, loss = 0.8552, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:01:38.958672 #train# epoch 56 step 2251, loss = 0.8601, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:02:48.946876 #train# epoch 57 step 2301, loss = 0.8584, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:04:01.681304 #train# epoch 58 step 2351, loss = 0.8298, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:05:19.731853 #train# epoch 60 step 2401, loss = 0.8271, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:06:31.838959 #train# epoch 61 step 2451, loss = 0.8368, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:07:43.183613 #train# epoch 62 step 2501, loss = 0.8494, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:08:55.361899 #train# epoch 63 step 2551, loss = 0.8448, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:10:13.557193 #train# epoch 65 step 2601, loss = 0.8374, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:11:26.559140 #train# epoch 66 step 2651, loss = 0.8509, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:12:40.106717 #train# epoch 67 step 2701, loss = 0.8473, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:13:53.561349 #train# epoch 68 step 2751, loss = 0.8278, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:15:11.164399 #train# epoch 70 step 2801, loss = 0.8516, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:16:23.987364 #train# epoch 71 step 2851, loss = 0.8482, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:17:37.538025 #train# epoch 72 step 2901, loss = 0.8381, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:18:50.803970 #train# epoch 73 step 2951, loss = 0.8392, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:20:09.926842 #train# epoch 75 step 3001, loss = 0.8352, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:21:23.467517 #train# epoch 76 step 3051, loss = 0.8432, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:22:36.814011 #train# epoch 77 step 3101, loss = 0.8386, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:23:50.353921 #train# epoch 78 step 3151, loss = 0.8205, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:25:10.364741 #train# epoch 80 step 3201, loss = 0.8377, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:26:26.145611 #train# epoch 81 step 3251, loss = 0.8341, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:27:41.951404 #train# epoch 82 step 3301, loss = 0.8491, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:28:56.440591 #train# epoch 83 step 3351, loss = 0.8509, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:30:14.614360 #train# epoch 85 step 3401, loss = 0.8526, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:31:28.703082 #train# epoch 86 step 3451, loss = 0.8547, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:32:45.081164 #train# epoch 87 step 3501, loss = 0.8491, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:34:02.405040 #train# epoch 88 step 3551, loss = 0.8524, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:35:24.192406 #train# epoch 90 step 3601, loss = 0.8349, 1.3 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:36:42.683488 #train# epoch 91 step 3651, loss = 0.8280, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:38:01.982042 #train# epoch 92 step 3701, loss = 0.8494, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:39:22.051422 #train# epoch 93 step 3751, loss = 0.8288, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:40:50.166302 #train# epoch 95 step 3801, loss = 0.8388, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:42:11.637083 #train# epoch 96 step 3851, loss = 0.8244, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:43:32.539723 #train# epoch 97 step 3901, loss = 0.8201, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:44:54.130124 #train# epoch 98 step 3951, loss = 0.8427, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:46:17.426888 #train# epoch 100 step 4001, loss = 0.8418, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:47:35.788358 #train# epoch 101 step 4051, loss = 0.8429, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:48:55.703202 #train# epoch 102 step 4101, loss = 0.8215, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:50:17.660867 #train# epoch 103 step 4151, loss = 0.8438, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:51:41.444274 #train# epoch 105 step 4201, loss = 0.8303, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:53:01.574142 #train# epoch 106 step 4251, loss = 0.8455, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:54:20.818089 #train# epoch 107 step 4301, loss = 0.8328, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:55:42.064592 #train# epoch 108 step 4351, loss = 0.8389, 1.4 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:57:08.628496 #train# epoch 110 step 4401, loss = 0.8375, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:58:31.824630 #train# epoch 111 step 4451, loss = 0.8220, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 17:59:54.948264 #train# epoch 112 step 4501, loss = 0.8339, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:01:17.615795 #train# epoch 113 step 4551, loss = 0.8295, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:02:46.201549 #train# epoch 115 step 4601, loss = 0.8450, 1.5 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:04:11.184533 #train# epoch 116 step 4651, loss = 0.8417, 1.6 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:05:37.044315 #train# epoch 117 step 4701, loss = 0.8231, 1.6 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:07:07.031700 #train# epoch 118 step 4751, loss = 0.8529, 1.6 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:08:43.353119 #train# epoch 120 step 4801, loss = 0.8416, 1.7 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:10:12.755007 #train# epoch 121 step 4851, loss = 0.8422, 1.6 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:11:42.384401 #train# epoch 122 step 4901, loss = 0.8220, 1.6 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:13:11.804134 #train# epoch 123 step 4951, loss = 0.8358, 1.6 sec/batch
+#DQN train# initilizing Centers
+step:  0  finish
+step:  1  finish
+step:  2  finish
+step:  3  finish
+2019-05-17 18:14:38.421886 #traing# finish training
+saving model to ./models/lr0.002_cq0.0001_ss4_sc256_d64_cifar10.npy
+model saved
+initializing
+launching session
+loading img model from ./models/lr0.002_cq0.0001_ss4_sc256_d64_cifar10.npy
+['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8', 'C']
+img model loading finished
+Initializing Dataset
+Dataset already
+Initializing Dataset
+Dataset already
+2019-05-17 18:15:14.295970 #validation# start validation
+2019-05-17 18:15:14.296020 #validation# totally 1000 query in 10 batches
+Traceback (most recent call last):
+  File "train_val_script.py", line 72, in <module>
+    main(parse_args(sys.argv[1:]))
+  File "train_val_script.py", line 65, in main
+    maps = model.validation(database_img, query_img, config)
+  File "/home/chenshen/Projects/Hash/DeepHash/CY-DeepHash/DeepHash/model/cs/dqn.py", line 434, in validation
+    database_img, config.output_dim, config.n_subspace * config.n_subcenter)
+  File "/home/chenshen/Projects/Hash/DeepHash/CY-DeepHash/DeepHash/model/cs/dqn.py", line 384, in validation
+    (datetime.now(), img_query.n_samples, query_batch))
+AttributeError: 'DQN' object has no attribute 'cos_loss'

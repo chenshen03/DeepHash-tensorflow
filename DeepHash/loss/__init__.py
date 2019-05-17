@@ -2,7 +2,7 @@ import tensorflow as tf
 from distance.tfversion import distance
 
 
-def cosine_loss(self, u, label_u):
+def cosine_loss(u, label_u):
     ''' 
     DQN
     Param: 
@@ -148,7 +148,7 @@ def quantization_loss(z, h, C):
     Return: 
     '''
     with tf.name_scope('quantization_loss'):
-        loss = tf.reduce_mean(tf.reduce_sum(z - tf.matmul(h, C), -1))
+        loss = tf.reduce_mean(tf.reduce_sum(z - tf.matmul(h, C), 1))
     return loss
 
 
