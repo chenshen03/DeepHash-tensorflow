@@ -2,9 +2,9 @@ import os
 import sys
 import argparse
 import warnings
-import deephash.data_provider.image as dataset
-import deephash.model.dhn.dhn as model
-from deephash.util import Logger
+import data_provider.image as dataset
+import model.dhn.dhn as model
+from util import Logger
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -38,7 +38,7 @@ def parse_args(argv):
     network_group.add_argument('--learning-rate-decay-factor', type=float, default=0.5)
     network_group.add_argument('--learning-rate', type=float, default=0.0001)
     network_group.add_argument('--network', type=str, default='alexnet')
-    network_group.add_argument('--network-weights', type=str, default='../../DeepHash/architecture/pretrained_model/reference_pretrain.npy')
+    network_group.add_argument('--network-weights', type=str, default='../../deephash/architecture/pretrained_model/reference_pretrain.npy')
     network_group.add_argument('--finetune-all',  type=bool, default=True)
     network_group.add_argument('--test', default=False, action='store_true')
 
