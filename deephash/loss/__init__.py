@@ -136,7 +136,7 @@ Quantization Loss
 
 def simple_quantization_loss(z):
     ''' 
-    
+    DHN
     Param: 
     Return: 
     '''
