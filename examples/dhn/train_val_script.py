@@ -2,9 +2,9 @@ import os
 import sys
 import argparse
 import warnings
-import data_provider.image as dataset
-import model.dhn.dhn as model
-from util import Logger
+import deephash.data_provider.image as dataset
+import deephash.model.dhn.dhn as model
+from deephash.util import Logger
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)

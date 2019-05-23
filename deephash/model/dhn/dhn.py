@@ -13,8 +13,9 @@ from math import ceil
 import numpy as np
 import tensorflow as tf
 
-from architecture import img_alexnet_layers
-from evaluation import MAPs
+from deephash.architecture import img_alexnet_layers
+from deephash.evaluation import MAPs
+from deephash.loss import cross_entropy
 from .util import Dataset
 
 
@@ -111,34 +112,34 @@ class DHN(object):
         print("saving codes to %s" % codes_file)
         np.save(codes_file, np.array(codes))
 
-    @staticmethod
-    def cross_entropy(u, label_u, alpha=0.5, normed=False):
+    # @staticmethod
+    # def cross_entropy(u, label_u, alpha=0.5, normed=False):
 
-        label_ip = tf.cast(
-            tf.matmul(label_u, tf.transpose(label_u)), tf.float32)
-        s = tf.clip_by_value(label_ip, 0.0, 1.0)
+    #     label_ip = tf.cast(
+    #         tf.matmul(label_u, tf.transpose(label_u)), tf.float32)
+    #     s = tf.clip_by_value(label_ip, 0.0, 1.0)
 
-        # compute balance param
-        # s_t \in {-1, 1}
-        s_t = tf.multiply(tf.add(s, tf.constant(-0.5)), tf.constant(2.0))
-        sum_1 = tf.reduce_sum(s)
-        sum_all = tf.reduce_sum(tf.abs(s_t))
-        # TODO 负样本对的balance_param计算原理？
-        balance_param = tf.add(tf.abs(tf.add(s, tf.constant(-1.0))),
-                               tf.multiply(tf.div(sum_all, sum_1), s))
+    #     # compute balance param
+    #     # s_t \in {-1, 1}
+    #     s_t = tf.multiply(tf.add(s, tf.constant(-0.5)), tf.constant(2.0))
+    #     sum_1 = tf.reduce_sum(s)
+    #     sum_all = tf.reduce_sum(tf.abs(s_t))
+    #     # TODO 负样本对的balance_param计算原理？
+    #     balance_param = tf.add(tf.abs(tf.add(s, tf.constant(-1.0))),
+    #                            tf.multiply(tf.div(sum_all, sum_1), s))
 
-        if normed:
-            ip_1 = tf.matmul(u, tf.transpose(u))
+    #     if normed:
+    #         ip_1 = tf.matmul(u, tf.transpose(u))
 
-            def reduce_shaper(t):
-                return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
-            mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)),
-                                      reduce_shaper(tf.square(u)), transpose_b=True))
-            ip = tf.div(ip_1, mod_1)
-        else:
-            ip = tf.clip_by_value(tf.matmul(u, tf.transpose(u)), -1.5e1, 1.5e1)
-        ones = tf.ones([tf.shape(u)[0], tf.shape(u)[0]])
-        return tf.reduce_mean(tf.multiply(tf.log(ones + tf.exp(alpha * ip)) - s * alpha * ip, balance_param))
+    #         def reduce_shaper(t):
+    #             return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
+    #         mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)),
+    #                                   reduce_shaper(tf.square(u)), transpose_b=True))
+    #         ip = tf.div(ip_1, mod_1)
+    #     else:
+    #         ip = tf.clip_by_value(tf.matmul(u, tf.transpose(u)), -1.5e1, 1.5e1)
+    #     ones = tf.ones([tf.shape(u)[0], tf.shape(u)[0]])
+    #     return tf.reduce_mean(tf.multiply(tf.log(ones + tf.exp(alpha * ip)) - s * alpha * ip, balance_param))
 
     def apply_loss_function(self, global_step):
         # loss function
