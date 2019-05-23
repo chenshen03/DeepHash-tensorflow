@@ -4,13 +4,16 @@ import argparse
 import warnings
 import data_provider.image as dataset
 import model.dhn.dhn as model
+from util import Logger
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
 
 label_dims = {'cifar10': 10, 'cub': 200, 'nuswide_21': 21,
               'nuswide_81': 81, 'coco': 80, 'imagenet': 100, 'cifar10_zero_shot': 10}
+
 Rs = {'cifar10': 54000, 'nuswide_81': 5000, 'coco': 5000,
       'nuswide_21': 5000, 'imagenet': 5000, 'cifar10_zero_shot': 15000}
 
@@ -27,11 +30,11 @@ def parse_args(argv):
 
     # network config
     network_group = parser.add_argument_group(title='Network config')
-    network_group.add_argument('--gpu', type=int, default=0)
+    network_group.add_argument('--gpu_id', type=str, default='0')
     network_group.add_argument('--max-iter', type=int, default=10000)
     network_group.add_argument('--batch-size', type=int, default=256)
     network_group.add_argument('--val-batch-size', type=int, default=100)
-    network_group.add_argument('--decay-step', type=int, default=2000)
+    network_group.add_argument('--decay-step', type=int, default=3000)
     network_group.add_argument('--learning-rate-decay-factor', type=float, default=0.5)
     network_group.add_argument('--learning-rate', type=float, default=0.0001)
     network_group.add_argument('--network', type=str, default='alexnet')
@@ -44,11 +47,11 @@ def parse_args(argv):
     dataset_group.add_argument('--dataset', type=str, default='cifar10')
     dataset_group.add_argument('--prefix', type=str, default='dhn')
     # config process
-    args, rest = parser.parse_known_args()
-    _dataset = args.dataset
+    config, rest = parser.parse_known_args()
+    _dataset = config.dataset
     _data_root = os.path.join('../../data', _dataset)
-    _save_dir = f'snapshot/{args.dataset}_{args.network}_{args.output_dim}bit_{args.prefix}'
-    _filename = f'lr{args.learning_rate}_lambda{args.cq_lambda}_alpha{args.alpha}'
+    _save_dir = f'snapshot/{config.dataset}_{config.network}_{config.output_dim}bit_{config.prefix}'
+    _filename = f'lr{config.learning_rate}_lambda{config.cq_lambda}_alpha{config.alpha}'
 
     dataset_group.add_argument('--R', type=int, default=Rs[_dataset])
     dataset_group.add_argument('--label-dim', type=str, default=label_dims[_dataset])
@@ -63,20 +66,25 @@ def parse_args(argv):
 
 
 def main(config):
-    print(config)
-    
-    if config.test == True:
-          config.network_weights = os.path.join(config.save_dir, config.filename+'.npy')
-    else:
-          train_img = dataset.import_train(config.data_root, config.img_tr)
-          network_weights = model.train(train_img, config)
-          config.network_weights = network_weights
+      if not os.path.exists(config.save_dir):
+            os.makedirs(config.save_dir)
+      sys.stdout = Logger(os.path.join(config.save_dir, config.filename+'.log'))
 
-    query_img, database_img = dataset.import_validation(config.data_root, config.img_te, config.img_db)
-    maps = model.validation(database_img, query_img, config)
+      print(config)
 
-    for key in maps:
-          print(f"{key}: {maps[key]}")
+      if config.test == True:
+            config.network_weights = os.path.join(config.save_dir, config.filename+'.npy')
+      else:
+            train_img = dataset.import_train(config.data_root, config.img_tr)
+            network_weights = model.train(train_img, config)
+            config.network_weights = network_weights
+
+      query_img, database_img = dataset.import_validation(config.data_root, config.img_te, config.img_db)
+      maps = model.validation(database_img, query_img, config)
+
+      for key in maps:
+            print(f"{key}: {maps[key]}")
+
 
 if __name__ == "__main__":
     main(parse_args(sys.argv[1:]))

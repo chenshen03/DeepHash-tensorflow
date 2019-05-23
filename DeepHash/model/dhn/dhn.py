@@ -24,7 +24,7 @@ class DHN(object):
         print("initializing")
         np.set_printoptions(precision=4)
         self.stage = tf.placeholder_with_default(tf.constant(0), [])
-        self.device = '/gpu:' + str(config.gpu)
+        self.device = '/gpu:' + config.gpu_id
         self.output_dim = config.output_dim
         self.n_class = config.label_dim
         self.cq_lambda = config.cq_lambda
@@ -41,10 +41,9 @@ class DHN(object):
 
         self.finetune_all = config.finetune_all
 
-        self.filename = config.filename
-        self.save_dir = config.save_dir
-        self.save_file = os.path.join(self.save_dir, self.filename + '.npy')
-        self.codes_file = os.path.join(self.save_dir, self.filename + '_codes.npy')
+        self.save_file = os.path.join(config.save_dir, config.filename + '.npy')
+        self.codes_file = os.path.join(config.save_dir, config.filename + '_codes.npy')
+        self.tflog_path = os.path.join(config.save_dir, config.filename)
 
         # Setup session
         print("launching session")
@@ -198,15 +197,10 @@ class DHN(object):
     def train(self, img_dataset):
         print("%s #train# start training" % datetime.now())
 
-        if not os.path.exists(self.save_dir):
-            os.makedirs(self.save_dir)
         # tensorboard
-        tflog_path = os.path.join(self.save_dir, self.filename)
-        if os.path.exists(tflog_path):
-            shutil.rmtree(tflog_path)
-        train_writer = tf.summary.FileWriter(tflog_path, self.sess.graph)
-        # log
-        log_file = open(os.path.join(self.save_dir, self.filename+'.log'), 'w')
+        if os.path.exists(self.tflog_path):
+            shutil.rmtree(self.tflog_path)
+        train_writer = tf.summary.FileWriter(self.tflog_path, self.sess.graph)
 
         for train_iter in range(self.max_iter):
             images, labels = img_dataset.next_batch(self.batch_size)
@@ -226,8 +220,6 @@ class DHN(object):
             if train_iter % 1 == 0:
                 train_writer.add_summary(summary, train_iter)
                 print("%s #train# step %4d, loss = %.4f, cross_entropy loss = %.4f, %.1f sec/batch"
-                      % (datetime.now(), train_iter + 1, loss, cos_loss, duration))
-                log_file.write("%s #train# step %4d, loss = %.4f, cross_entropy loss = %.4f, %.1f sec/batch\n"
                       % (datetime.now(), train_iter + 1, loss, cos_loss, duration))
 
         print("%s #traing# finish training" % datetime.now())
