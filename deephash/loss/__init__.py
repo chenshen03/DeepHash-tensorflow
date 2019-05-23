@@ -3,10 +3,8 @@ from distance.tfversion import distance
 
 
 def cosine_loss(u, label_u):
-    ''' 
+    '''cosine loss
     DQN
-    Param: 
-    Return: 
     '''
     with tf.name_scope('cosine_loss'):
         def reduce_shaper(t):
@@ -26,10 +24,8 @@ def cosine_loss(u, label_u):
 
 
 def cross_entropy(u, label_u, alpha=0.5, normed=False):
-    ''' 
-    DHN
-    Param: 
-    Return: 
+    '''cross entropy loss
+    DHN 
     '''
     label_ip = tf.cast(
         tf.matmul(label_u, tf.transpose(label_u)), tf.float32)
@@ -60,10 +56,8 @@ def cross_entropy(u, label_u, alpha=0.5, normed=False):
 
 
 def cauchy_cross_entropy(u, label_u, output_dim=300, v=None, label_v=None, gamma=1, normed=True):
-    ''' 
+    '''cauchy cross entropy loss
     DCH
-    Param: 
-    Return: 
     '''
     if v is None:
         v = u
@@ -112,10 +106,8 @@ def cauchy_cross_entropy(u, label_u, output_dim=300, v=None, label_v=None, gamma
 
 
 def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
-    ''' 
-    DTQ
-    Param: 
-    Return: 
+    '''triplet loss
+    DTQ 
     '''
     with tf.variable_scope('triplet_loss'):
         pos_dist = distance(anchor, pos, pair=False, dist_type=dist_type)
@@ -130,39 +122,29 @@ def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
     return loss
 
 
-'''
-Quantization Loss
-'''
-
-def simple_quantization_loss(z):
-    ''' 
+def quantization_loss(z):
+    '''quantization loss
     DHN
-    Param: 
-    Return: 
     '''
-    with tf.name_scope('simple_quantization_loss'):
+    with tf.name_scope('quantization_loss'):
         loss = tf.reduce_mean(tf.square(tf.subtract(tf.abs(z), tf.constant(1.0))))
     return loss
 
 
-def quantization_loss(z, h, C):
-    ''' 
+def pq_loss(z, h, C):
+    '''product quantization loss
     DTQ
-    Param: 
-    Return: 
     '''
-    with tf.name_scope('quantization_loss'):
+    with tf.name_scope('pq_loss'):
         loss = tf.reduce_mean(tf.reduce_sum(z - tf.matmul(h, C), 1))
     return loss
 
 
-def square_quantization_loss(z, h, C):
-    ''' 
+def square_pq_loss(z, h, C):
+    '''product quantization loss
     DQN
-    Param: 
-    Return: 
     '''
-    with tf.name_scope('square_quantization_loss'):
+    with tf.name_scope('square_pq_loss'):
         loss = tf.reduce_mean(tf.reduce_sum(tf.square(z - tf.matmul(h, C)), 1))
     return loss
 

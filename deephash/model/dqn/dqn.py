@@ -18,7 +18,7 @@ from sklearn.cluster import MiniBatchKMeans
 from architecture import img_alexnet_layers
 from evaluation import MAPs_CQ
 from .util import Dataset
-from loss import cosine_loss, square_quantization_loss
+from loss import cosine_loss, pq_loss
 
 
 class DQN(object):
@@ -165,9 +165,10 @@ class DQN(object):
     def apply_loss_function(self, global_step):
         # loss function
         self.cos_loss = cosine_loss(self.img_last_layer, self.img_label)
-        self.q_loss = square_quantization_loss(self.img_last_layer, self.b_img, self.C)
+        self.q_loss_img = pq_loss(self.img_last_layer, self.b_img, self.C)
         self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
-        self.loss = self.cos_loss + self.q_lambda * self.q_loss
+        self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
+        self.loss = self.cos_loss + self.q_loss
 
         # Last layer has a 10 times learning rate
         self.lr = tf.train.exponential_decay(

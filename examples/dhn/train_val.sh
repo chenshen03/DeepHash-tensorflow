@@ -5,4 +5,4 @@
 # baseline
 # CUDA_VISIBLE_DEVICES=0 python -u train_val_script.py --gpu 0
 
-CUDA_VISIBLE_DEVICES=0 python -u train_val_script.py --gpu 0
+CUDA_VISIBLE_DEVICES=0 python -u train_val_script.py --gpu 0 --cq-lambda 1

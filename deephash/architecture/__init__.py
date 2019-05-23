@@ -3,11 +3,16 @@ import tensorflow as tf
 import numpy as np
 
 
-def img_alexnet_layers(img, batch_size, output_dim, stage, model_weights, with_tanh=True, val_batch_size=32):
+def img_alexnet_layers(img, batch_size, output_dim, stage, model_weights=None, with_tanh=True, val_batch_size=32):
     deep_param_img = {}
     train_layers = []
     train_last_layer = []
-    print("loading img model from %s" % model_weights)
+
+    if model_weights is None:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        model_weights = os.path.join(dir_path, "pretrained_model/reference_pretrain.npy")
+    
+    print("loading img model from ", model_weights)
     net_data = dict(np.load(model_weights, encoding='bytes').item())
     print(list(net_data.keys()))
 

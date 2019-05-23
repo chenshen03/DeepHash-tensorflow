@@ -1,4 +1,4 @@
-#################################################################################
+##################################################################################
 # Deep Hashing Network for Efficient Similarity Retrieval                        #
 # Authors: Han Zhu, Mingsheng Long, Jianmin Wang, Yue Cao                        #
 # Contact: caoyue10@gmail.com                                                    #
@@ -15,7 +15,7 @@ import tensorflow as tf
 
 from architecture import img_alexnet_layers
 from evaluation import MAPs
-from loss import cross_entropy, simple_quantization_loss
+from loss import cross_entropy, quantization_loss
 from .util import Dataset
 
 
@@ -35,16 +35,15 @@ class DHN(object):
         self.val_batch_size = config.val_batch_size
         self.max_iter = config.max_iter
         self.network = config.network
-        self.loss_type = config.loss_type
         self.learning_rate = config.learning_rate
         self.learning_rate_decay_factor = config.learning_rate_decay_factor
         self.decay_step = config.decay_step
 
         self.finetune_all = config.finetune_all
 
-        self.save_file = os.path.join(config.save_dir, config.filename + '.npy')
-        self.codes_file = os.path.join(config.save_dir, config.filename + '_codes.npy')
-        self.tflog_path = os.path.join(config.save_dir, config.filename)
+        self.save_file = os.path.join(config.save_dir, 'network_weights.npy')
+        self.codes_file = os.path.join(config.save_dir, 'codes.npy')
+        self.tflog_path = os.path.join(config.save_dir, 'tflog')
 
         # Setup session
         print("launching session")
@@ -114,13 +113,8 @@ class DHN(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        if self.loss_type == 'cross_entropy':
-            self.cos_loss = cross_entropy(self.img_last_layer, self.img_label, self.alpha)
-        elif self.loss_type == 'normed_cross_entropy':
-            self.cos_loss = cross_entropy(self.img_last_layer, self.img_label, self.alpha, True)
-
-        self.q_loss_img = simple_quantization_loss(self.img_last_layer)
-            
+        self.cos_loss = cross_entropy(self.img_last_layer, self.img_label, self.alpha, True)
+        self.q_loss_img = quantization_loss(self.img_last_layer)
         self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
         self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
         self.loss = self.cos_loss + self.q_loss
@@ -179,8 +173,8 @@ class DHN(object):
             assign_lambda = self.q_lambda.assign(self.cq_lambda)
             self.sess.run([assign_lambda])
 
-            _, loss, cos_loss, output, summary = self.sess.run(
-                [self.train_op, self.loss, self.cos_loss, self.img_last_layer, self.merged],
+            _, loss, cos_loss, q_loss, output, summary = self.sess.run(
+                [self.train_op, self.loss, self.cos_loss, self.q_loss, self.img_last_layer, self.merged],
                 feed_dict={self.img: images,
                            self.img_label: labels})
 
@@ -189,8 +183,8 @@ class DHN(object):
 
             if train_iter % 1 == 0:
                 train_writer.add_summary(summary, train_iter)
-                print("%s #train# step %4d, loss = %.4f, cross_entropy loss = %.4f, %.1f sec/batch"
-                      % (datetime.now(), train_iter + 1, loss, cos_loss, duration))
+                print("%s #train# step %4d, loss = %.4f, cross_entropy loss = %.4f, quantization loss = %.4f, %.1f sec/batch"
+                      % (datetime.now(), train_iter + 1, loss, cos_loss, q_loss, duration))
 
         print("%s #traing# finish training" % datetime.now())
         self.save_model()
