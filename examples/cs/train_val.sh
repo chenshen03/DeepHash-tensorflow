@@ -3,7 +3,7 @@
 export TF_CPP_MIN_LOG_LEVEL=3
 
 # baseline
-CUDA_VISIBLE_DEVICES=1 python -u train_val_script.py > logs/log2 2>&1 &
+CUDA_VISIBLE_DEVICES=1 python -u train_val_script.py > logs/log1 2>&1 &
 
 # CUDA_VISIBLE_DEVICES=0 python -u train_val_script.py --learning-rate 0.002 --batch-size 256 --output-dim 64\
 #  --cq-lambda 0.0001 --n-subspace 4 --n-subcenter 256 --R 54000 --dataset cifar10 --gpu 0 > logs/log1 2>&1 &

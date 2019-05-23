@@ -24,9 +24,13 @@ def parse_args(argv):
     dataset_group.add_argument('--save-dir', type=str, default='./models/')
     dataset_group.add_argument('--log-dir', type=str, default='tflog')
     dataset_group.add_argument('--label-dim', type=str, default=label_dims[_dataset])
-    dataset_group.add_argument('--img-tr', type=str, default="{}/train.txt".format(data_root))
-    dataset_group.add_argument('--img-te', type=str, default="{}/test.txt".format(data_root))
-    dataset_group.add_argument('--img-db', type=str, default="{}/database.txt".format(data_root))
+#     dataset_group.add_argument('--img-tr', type=str, default="{}/train.txt".format(data_root))
+#     dataset_group.add_argument('--img-te', type=str, default="{}/test.txt".format(data_root))
+#     dataset_group.add_argument('--img-db', type=str, default="{}/database.txt".format(data_root))
+    dataset_group.add_argument('--img-tr', type=str, default="{}/train_50K.txt".format(data_root))
+    dataset_group.add_argument('--img-te', type=str, default="{}/test_10K.txt".format(data_root))
+    dataset_group.add_argument('--img-db', type=str, default="{}/train_50K.txt".format(data_root))
+    dataset_group.add_argument('--R', type=int, default=50000)
     # network config
     network_group = parser.add_argument_group(title='Network config')
     network_group.add_argument('--gpu', type=int, default=0)
@@ -41,7 +45,6 @@ def parse_args(argv):
     network_group.add_argument('--finetune-all',  type=bool, default=True, help='if only finetune last layer')
     # algorithm config
     algorithm_group = parser.add_argument_group(title='Algorithm config')
-    algorithm_group.add_argument('--R', type=int, default=54000)
     algorithm_group.add_argument('--output-dim', type=int, default=64)
     algorithm_group.add_argument('--max-iter-update-b', type=int, default=3)
     algorithm_group.add_argument('--max-iter-update-Cb', type=int, default=1)
@@ -56,11 +59,11 @@ def parse_args(argv):
 def main(config):
     print(config)
     
-    train_img = dataset.import_train(data_root, config.img_tr)
-    model_weights = model.train(train_img, config)
-    config.model_weights = model_weights
+#     train_img = dataset.import_train(data_root, config.img_tr)
+#     model_weights = model.train(train_img, config)
+#     config.model_weights = model_weights
     
-#     config.model_weights = './models/lr0.002_cq0.0001_ss4_sc256_d64_cifar10.npy'
+    config.model_weights = './models/lr0.002_cq0.0001_ss4_sc256_d64_cifar10.npy'
     query_img, database_img = dataset.import_validation(data_root, config.img_te, config.img_db)
     maps = model.validation(database_img, query_img, config)
 

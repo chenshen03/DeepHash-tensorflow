@@ -9,9 +9,9 @@ import model.dqn.dqn as model
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-_dataset = 'cifar10'
+_dataset = 'nuswide_21'
 data_root = os.path.join('../../data', _dataset)
-label_dims = {'cifar10': 10, 'cub': 200, 'nuswide_81': 81}
+label_dims = {'cifar10': 10, 'cub': 200, 'nuswide_21': 21, 'nuswide_81': 81}
 
 
 def parse_args(argv):
@@ -27,6 +27,7 @@ def parse_args(argv):
     dataset_group.add_argument('--img-tr', type=str, default="{}/train.txt".format(data_root))
     dataset_group.add_argument('--img-te', type=str, default="{}/test.txt".format(data_root))
     dataset_group.add_argument('--img-db', type=str, default="{}/database.txt".format(data_root))
+    dataset_group.add_argument('--R', type=int, default=54000)
     # network config
     network_group = parser.add_argument_group(title='Network config')
     network_group.add_argument('--gpu', type=int, default=0)
@@ -41,7 +42,6 @@ def parse_args(argv):
     network_group.add_argument('--finetune-all',  type=bool, default=True, help='if only finetune last layer')
     # algorithm config
     algorithm_group = parser.add_argument_group(title='Algorithm config')
-    algorithm_group.add_argument('--R', type=int, default=54000)
     algorithm_group.add_argument('--output-dim', type=int, default=64)
     algorithm_group.add_argument('--max-iter-update-b', type=int, default=3)
     algorithm_group.add_argument('--max-iter-update-Cb', type=int, default=1)

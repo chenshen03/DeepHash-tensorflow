@@ -348,7 +348,6 @@ class DQN(object):
 
     def validation(self, img_database, img_query, R=100):
         if os.path.exists(self.codes_file):
-        # if False:
             print("loading ", self.codes_file)
             img_database, img_query, C_tmp = self.load_codes(self.codes_file)
         else:

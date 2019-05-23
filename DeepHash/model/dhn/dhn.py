@@ -24,32 +24,27 @@ class DHN(object):
         print("initializing")
         np.set_printoptions(precision=4)
         self.stage = tf.placeholder_with_default(tf.constant(0), [])
-        self.device = config['device']
-        self.output_dim = config['output_dim']
-        self.n_class = config['label_dim']
-        self.cq_lambda = config['cq_lambda']
-        self.alpha = config['alpha']
+        self.device = '/gpu:' + str(config.gpu)
+        self.output_dim = config.output_dim
+        self.n_class = config.label_dim
+        self.cq_lambda = config.cq_lambda
+        self.alpha = config.alpha
 
-        self.batch_size = config['batch_size']
-        self.val_batch_size = config['val_batch_size']
-        self.max_iter = config['max_iter']
-        self.img_model = config['img_model']
-        self.loss_type = config['loss_type']
-        self.learning_rate = config['learning_rate']
-        self.learning_rate_decay_factor = config['learning_rate_decay_factor']
-        self.decay_step = config['decay_step']
+        self.batch_size = config.batch_size
+        self.val_batch_size = config.val_batch_size
+        self.max_iter = config.max_iter
+        self.network = config.network
+        self.loss_type = config.loss_type
+        self.learning_rate = config.learning_rate
+        self.learning_rate_decay_factor = config.learning_rate_decay_factor
+        self.decay_step = config.decay_step
 
-        self.finetune_all = config['finetune_all']
+        self.finetune_all = config.finetune_all
 
-        self.file_name = 'lr_{}_cqlambda_{}_alpha_{}_dataset_{}'.format(
-            self.learning_rate,
-            self.cq_lambda,
-            self.alpha,
-            config['dataset'])
-        self.save_dir = config['save_dir']
-        self.save_file = os.path.join(
-            config['save_dir'], self.file_name + '.npy')
-        self.log_dir = config['log_dir']
+        self.filename = config.filename
+        self.save_dir = config.save_dir
+        self.save_file = os.path.join(self.save_dir, self.filename + '.npy')
+        self.codes_file = os.path.join(self.save_dir, self.filename + '_codes.npy')
 
         # Setup session
         print("launching session")
@@ -64,7 +59,7 @@ class DHN(object):
             self.img = tf.placeholder(tf.float32, [None, 256, 256, 3])
             self.img_label = tf.placeholder(tf.float32, [None, self.n_class])
 
-            self.model_weights = config['model_weights']
+            self.network_weights = config.network_weights
             self.img_last_layer, self.deep_param_img, self.train_layers, self.train_last_layer = self.load_model()
 
             self.global_step = tf.Variable(0, trainable=False)
@@ -73,12 +68,12 @@ class DHN(object):
         return
 
     def load_model(self):
-        if self.img_model == 'alexnet':
+        if self.network == 'alexnet':
             img_output = img_alexnet_layers(
                 self.img, self.batch_size, self.output_dim,
-                self.stage, self.model_weights, val_batch_size=self.val_batch_size)
+                self.stage, self.network_weights, val_batch_size=self.val_batch_size)
         else:
-            raise Exception('cannot use such CNN model as ' + self.img_model)
+            raise Exception('cannot use such CNN model as ' + self.network)
         return img_output
 
     def save_model(self, model_file=None):
@@ -88,10 +83,34 @@ class DHN(object):
         for layer in self.deep_param_img:
             model[layer] = self.sess.run(self.deep_param_img[layer])
         print("saving model to %s" % model_file)
-        if os.path.exists(self.save_dir) is False:
-            os.makedirs(self.save_dir)
+        folder = os.path.dirname(model_file)
+        if os.path.exists(folder) is False:
+            os.makedirs(folder)
         np.save(model_file, np.array(model))
         return
+
+    def load_codes(self, codes_file=None):
+        if codes_file is None:
+            codes_file = self.codes_file
+        codes = np.load(codes_file).item()
+
+        import collections
+        mDataset = collections.namedtuple('Dataset', ['output', 'label'])  
+        database = mDataset(codes['db_features'], codes['db_label'])
+        query = mDataset(codes['query_features'], codes['queary_label'])
+        return database, query
+
+    def save_codes(self, database, query, codes_file=None):
+        if codes_file is None:
+            codes_file = self.codes_file
+        codes = {
+            'db_features': database.output,
+            'db_label': database.label,
+            'query_features': query.output,
+            'queary_label': query.label,
+        }
+        print("saving codes to %s" % codes_file)
+        np.save(codes_file, np.array(codes))
 
     @staticmethod
     def cross_entropy(u, label_u, alpha=0.5, normed=False):
@@ -179,11 +198,15 @@ class DHN(object):
     def train(self, img_dataset):
         print("%s #train# start training" % datetime.now())
 
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
         # tensorboard
-        tflog_path = os.path.join(self.log_dir, self.file_name)
+        tflog_path = os.path.join(self.save_dir, self.filename)
         if os.path.exists(tflog_path):
             shutil.rmtree(tflog_path)
         train_writer = tf.summary.FileWriter(tflog_path, self.sess.graph)
+        # log
+        log_file = open(os.path.join(self.save_dir, self.filename+'.log'), 'w')
 
         for train_iter in range(self.max_iter):
             images, labels = img_dataset.next_batch(self.batch_size)
@@ -196,13 +219,15 @@ class DHN(object):
                 [self.train_op, self.loss, self.cos_loss, self.img_last_layer, self.merged],
                 feed_dict={self.img: images,
                            self.img_label: labels})
-            train_writer.add_summary(summary, train_iter)
 
             img_dataset.feed_batch_output(self.batch_size, output)
             duration = time.time() - start_time
 
             if train_iter % 1 == 0:
+                train_writer.add_summary(summary, train_iter)
                 print("%s #train# step %4d, loss = %.4f, cross_entropy loss = %.4f, %.1f sec/batch"
+                      % (datetime.now(), train_iter + 1, loss, cos_loss, duration))
+                log_file.write("%s #train# step %4d, loss = %.4f, cross_entropy loss = %.4f, %.1f sec/batch\n"
                       % (datetime.now(), train_iter + 1, loss, cos_loss, duration))
 
         print("%s #traing# finish training" % datetime.now())
@@ -212,28 +237,34 @@ class DHN(object):
         self.sess.close()
 
     def validation(self, img_query, img_database, R=100):
-        print("%s #validation# start validation" % (datetime.now()))
-        query_batch = int(ceil(img_query.n_samples / self.val_batch_size))
-        print("%s #validation# totally %d query in %d batches" % (datetime.now(), img_query.n_samples, query_batch))
-        for i in range(query_batch):
-            images, labels = img_query.next_batch(self.val_batch_size)
-            output, loss = self.sess.run([self.img_last_layer, self.cos_loss],
-                                         feed_dict={self.img: images, self.img_label: labels, self.stage: 1})
-            img_query.feed_batch_output(self.val_batch_size, output)
-            print('Cosine Loss: %s' % loss)
+        if os.path.exists(self.codes_file):
+            print("loading ", self.codes_file)
+            img_database, img_query = self.load_codes(self.codes_file)
+        else:
+            print("%s #validation# start validation" % (datetime.now()))
+            query_batch = int(ceil(img_query.n_samples / self.val_batch_size))
+            print("%s #validation# totally %d query in %d batches" % (datetime.now(), img_query.n_samples, query_batch))
+            for i in range(query_batch):
+                images, labels = img_query.next_batch(self.val_batch_size)
+                output, loss = self.sess.run([self.img_last_layer, self.cos_loss],
+                                            feed_dict={self.img: images, self.img_label: labels, self.stage: 1})
+                img_query.feed_batch_output(self.val_batch_size, output)
+                print('Cosine Loss: %s' % loss)
 
-        database_batch = int(ceil(img_database.n_samples / self.val_batch_size))
-        print("%s #validation# totally %d database in %d batches" %
-              (datetime.now(), img_database.n_samples, database_batch))
-        for i in range(database_batch):
-            images, labels = img_database.next_batch(self.val_batch_size)
+            database_batch = int(ceil(img_database.n_samples / self.val_batch_size))
+            print("%s #validation# totally %d database in %d batches" %
+                (datetime.now(), img_database.n_samples, database_batch))
+            for i in range(database_batch):
+                images, labels = img_database.next_batch(self.val_batch_size)
 
-            output, loss = self.sess.run([self.img_last_layer, self.cos_loss],
-                                         feed_dict={self.img: images, self.img_label: labels, self.stage: 1})
-            img_database.feed_batch_output(self.val_batch_size, output)
-            # print output[:10, :10]
-            if i % 100 == 0:
-                print('Cosine Loss[%d/%d]: %s' % (i, database_batch, loss))
+                output, loss = self.sess.run([self.img_last_layer, self.cos_loss],
+                                            feed_dict={self.img: images, self.img_label: labels, self.stage: 1})
+                img_database.feed_batch_output(self.val_batch_size, output)
+                # print output[:10, :10]
+                if i % 100 == 0:
+                    print('Cosine Loss[%d/%d]: %s' % (i, database_batch, loss))
+            # save features and codes
+            self.save_codes(img_database, img_query)
 
         mAPs = MAPs(R)
 
@@ -242,21 +273,21 @@ class DHN(object):
         return {
             'i2i_by_feature': mAPs.get_mAPs_by_feature(img_database, img_query),
             'i2i_after_sign': mAPs.get_mAPs_after_sign(img_database, img_query),
+            'i2i_map_radius_2': mmap,
             'i2i_prec_radius_2': prec,
-            'i2i_recall_radius_2': rec,
-            'i2i_map_radius_2': mmap
+            'i2i_recall_radius_2': rec
         }
 
 
 def train(train_img, config):
     model = DHN(config)
-    img_dataset = Dataset(train_img, config['output_dim'])
+    img_dataset = Dataset(train_img, config.output_dim)
     model.train(img_dataset)
     return model.save_file
 
 
 def validation(database_img, query_img, config):
     model = DHN(config)
-    img_database = Dataset(database_img, config['output_dim'])
-    img_query = Dataset(query_img, config['output_dim'])
-    return model.validation(img_query, img_database, config['R'])
+    img_database = Dataset(database_img, config.output_dim)
+    img_query = Dataset(query_img, config.output_dim)
+    return model.validation(img_query, img_database, config.R)

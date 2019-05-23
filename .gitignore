@@ -104,7 +104,8 @@ pretrained_model/
 logs/
 tflog/
 models/
+snapshot/
 *.swp
 .vscode/
 data/
-backup/
+snap

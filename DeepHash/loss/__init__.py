@@ -130,6 +130,10 @@ def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
     return loss
 
 
+'''
+Quantization Loss
+'''
+
 def simple_quantization_loss(z):
     ''' 
     
