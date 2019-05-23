@@ -101,8 +101,10 @@ ENV/
 .mypy_cache/
 
 pretrained_model/
+logs/
 tflog/
 models/
 *.swp
 .vscode/
 data/
+backup/
