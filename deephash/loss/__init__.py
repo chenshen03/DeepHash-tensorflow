@@ -2,8 +2,27 @@ import tensorflow as tf
 from distance.tfversion import distance
 
 
-def cosine_loss(u, label_u):
+def pairwise_inner_product_loss(u, label_u):
     '''cosine loss
+    (Liu etal. 2012; Xia et al. 2014)
+    '''
+    with tf.name_scope('pairwise_inner_product_loss'):
+        def reduce_shaper(t):
+            return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
+
+        # let sim = {0, 1} to be {-1, 1}
+        Sim_1 = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
+        Sim_2 = tf.add(Sim_1, tf.constant(-0.5))
+        Sim = tf.multiply(Sim_2, tf.constant(2.0))
+
+        B = tf.shape[u][0]
+        ip = tf.matmul(u, u, transpose_b=True)
+        loss = tf.reduce_mean(tf.square(tf.subtract(Sim, tf.multiply(B, ip))))
+        return loss
+
+
+def cosine_loss(u, label_u):
+    '''pairwise squared loss
     DQN
     '''
     with tf.name_scope('cosine_loss'):
@@ -20,25 +39,28 @@ def cosine_loss(u, label_u):
             tf.square(u)), transpose_b=True))
         cos_1 = tf.div(ip_1, mod_1)
         loss = tf.reduce_mean(tf.square(tf.subtract(Sim, cos_1)))
-        return loss
+        return loss  
 
 
-def cross_entropy(u, label_u, alpha=0.5, normed=False):
+def cross_entropy_loss(u, label_u, alpha=0.5, normed=True, balances=True):
     '''cross entropy loss
     DHN 
     '''
-    label_ip = tf.cast(
-        tf.matmul(label_u, tf.transpose(label_u)), tf.float32)
+    label_ip = tf.cast(tf.matmul(label_u, tf.transpose(label_u)), tf.float32)
     s = tf.clip_by_value(label_ip, 0.0, 1.0)
 
-    # compute balance param
-    # s_t \in {-1, 1}
-    s_t = tf.multiply(tf.add(s, tf.constant(-0.5)), tf.constant(2.0))
-    sum_1 = tf.reduce_sum(s)
-    sum_all = tf.reduce_sum(tf.abs(s_t))
+    with tf.name_scope('balance'):
+        if balances:
+            # compute balance param
+            # s_t \in {-1, 1}
+            s_t = tf.multiply(tf.add(s, tf.constant(-0.5)), tf.constant(2.0))
+            sum_1 = tf.reduce_sum(s)
+            sum_all = tf.reduce_sum(tf.abs(s_t))
 
-    balance_param = tf.add(tf.abs(tf.add(s, tf.constant(-1.0))),
-                            tf.multiply(tf.div(sum_all, sum_1), s))
+            balance_param = tf.add(tf.abs(tf.add(s, tf.constant(-1.0))),
+                                    tf.multiply(tf.div(sum_all, sum_1), s))
+        else:
+            balance_param = tf.ones([tf.shape(u)[0], tf.shape(u)[0]])
 
     if normed:
         ip_1 = tf.matmul(u, tf.transpose(u))
@@ -55,7 +77,7 @@ def cross_entropy(u, label_u, alpha=0.5, normed=False):
     return loss
 
 
-def cauchy_cross_entropy(u, label_u, output_dim=300, v=None, label_v=None, gamma=1, normed=True):
+def cauchy_cross_entropy_loss(u, label_u, output_dim=300, v=None, label_v=None, gamma=1, normed=True):
     '''cauchy cross entropy loss
     DCH
     '''
@@ -109,7 +131,7 @@ def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
     '''triplet loss
     DTQ 
     '''
-    with tf.variable_scope('triplet_loss'):
+    with tf.name_scope('triplet_loss'):
         pos_dist = distance(anchor, pos, pair=False, dist_type=dist_type)
         neg_dist = distance(anchor, neg, pair=False, dist_type=dist_type)
         basic_loss = tf.maximum(pos_dist - neg_dist + margin, 0.0)
@@ -141,7 +163,7 @@ def pq_loss(z, h, C):
 
 
 def square_pq_loss(z, h, C):
-    '''product quantization loss
+    '''product quantization squared loss
     DQN
     '''
     with tf.name_scope('square_pq_loss'):

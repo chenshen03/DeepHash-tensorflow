@@ -3,7 +3,7 @@ import sys
 import argparse
 import warnings
 import data_provider.image as dataset
-import model.dhn.dhn as model
+import model.dhcs.dhcs as model
 from util import Logger
 
 
@@ -19,8 +19,8 @@ def parse_args(argv):
 
       # algorithm config
       algorithm_group = parser.add_argument_group(title='Algorithm config')
-      algorithm_group.add_argument('--output-dim', type=int, default=32)
-      algorithm_group.add_argument('--cq-lambda', type=float, default=0.01)
+      algorithm_group.add_argument('--output-dim', type=int, default=48)
+      algorithm_group.add_argument('--cq-lambda', type=float, default=0.0)
       algorithm_group.add_argument('--alpha', type=float, default=10) # 10.0 / 0.2
       # network config
       network_group = parser.add_argument_group(title='Network config')
@@ -39,7 +39,7 @@ def parse_args(argv):
       # dataset config
       dataset_group = parser.add_argument_group(title='Dataset config')
       dataset_group.add_argument('--dataset', type=str, default='cifar10')
-      dataset_group.add_argument('--prefix', type=str, default='dhn')
+      dataset_group.add_argument('--prefix', type=str, default='dhcs')
       # config process
       config, rest = parser.parse_known_args()
       _dataset = config.dataset
@@ -60,7 +60,7 @@ def main(config):
 
       if not os.path.exists(config.save_dir):
             os.makedirs(config.save_dir)
-      sys.stdout = Logger(os.path.join(config.save_dir, 'train.log'))
+      sys.stdout = Logger(os.path.join(config.save_dir, 'test.log'))
     
       print(config)
       data_root = os.path.join('../../data', config.dataset)

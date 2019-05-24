@@ -1,8 +1,12 @@
 #!/bin/bash
 
-# export TF_CPP_MIN_LOG_LEVEL=3
-
 # baseline
-# CUDA_VISIBLE_DEVICES=0 python -u train_val_script.py --gpu 0
+python -u train_val_script.py
 
-CUDA_VISIBLE_DEVICES=0 python -u train_val_script.py --gpu 0 --cq-lambda 1
+nohup python -u train_val_script.py --gpu 0 --output-dim 32 > 1.log 2>&1 &
+
+nohup python -u train_val_script.py --gpu 1 --output-dim 48 --prefix dhn_nobalanced > 2.log 2>&1 &
+
+nohup python -u train_val_script.py --gpu 2 --dataset nuswide_21 > 3.log 2>&1 &
+
+# nohup python -u train_val_script.py --gpu 3 --alpha 3 > 4.log 2>&1 &
