@@ -116,7 +116,7 @@ class DHN(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = cross_entropy_loss(self.img_last_layer, self.img_label, self.alpha, normed=True, balances=False)
+        self.cos_loss = cross_entropy_loss(self.img_last_layer, self.img_label, self.alpha, normed=True, balanced=True)
         self.q_loss_img = quantization_loss(self.img_last_layer)
         self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
         self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
@@ -134,29 +134,48 @@ class DHN(object):
         # for debug
         self.grads_and_vars = grads_and_vars
         tf.summary.scalar('loss', self.loss)
-        tf.summary.scalar('cos_loss', self.cos_loss)
+        tf.summary.scalar('ce_loss', self.cos_loss)
         tf.summary.scalar('q_loss', self.q_loss)
         tf.summary.scalar('lr', self.lr)
         self.merged = tf.summary.merge_all()
 
         if self.finetune_all:
             return opt.apply_gradients([(grads_and_vars[0][0], self.train_layers[0]),
-                                                         (grads_and_vars[1][0]*2, self.train_layers[1]),
+                                                         (grads_and_vars[1][0], self.train_layers[1]),
                                                          (grads_and_vars[2][0], self.train_layers[2]),
-                                                         (grads_and_vars[3][0]*2, self.train_layers[3]),
+                                                         (grads_and_vars[3][0], self.train_layers[3]),
                                                          (grads_and_vars[4][0], self.train_layers[4]),
-                                                         (grads_and_vars[5][0]*2, self.train_layers[5]),
+                                                         (grads_and_vars[5][0], self.train_layers[5]),
                                                          (grads_and_vars[6][0], self.train_layers[6]),
-                                                         (grads_and_vars[7][0]*2, self.train_layers[7]),
+                                                         (grads_and_vars[7][0], self.train_layers[7]),
                                                          (grads_and_vars[8][0], self.train_layers[8]),
-                                                         (grads_and_vars[9][0]*2, self.train_layers[9]),
+                                                         (grads_and_vars[9][0], self.train_layers[9]),
                                                          (grads_and_vars[10][0], self.train_layers[10]),
-                                                         (grads_and_vars[11][0]*2, self.train_layers[11]),
+                                                         (grads_and_vars[11][0], self.train_layers[11]),
                                                          (grads_and_vars[12][0], self.train_layers[12]),
-                                                         (grads_and_vars[13][0]*2, self.train_layers[13]),
+                                                         (grads_and_vars[13][0], self.train_layers[13]),
                                                          (fcgrad*10, self.train_last_layer[0]),
-                                                         (fbgrad*20, self.train_last_layer[1])],
+                                                         (fbgrad*10, self.train_last_layer[1])],
                                                         global_step=global_step)
+        
+#         if self.finetune_all:
+#             return opt.apply_gradients([(grads_and_vars[0][0], self.train_layers[0]),
+#                                                          (grads_and_vars[1][0]*2, self.train_layers[1]),
+#                                                          (grads_and_vars[2][0], self.train_layers[2]),
+#                                                          (grads_and_vars[3][0]*2, self.train_layers[3]),
+#                                                          (grads_and_vars[4][0], self.train_layers[4]),
+#                                                          (grads_and_vars[5][0]*2, self.train_layers[5]),
+#                                                          (grads_and_vars[6][0], self.train_layers[6]),
+#                                                          (grads_and_vars[7][0]*2, self.train_layers[7]),
+#                                                          (grads_and_vars[8][0], self.train_layers[8]),
+#                                                          (grads_and_vars[9][0]*2, self.train_layers[9]),
+#                                                          (grads_and_vars[10][0], self.train_layers[10]),
+#                                                          (grads_and_vars[11][0]*2, self.train_layers[11]),
+#                                                          (grads_and_vars[12][0], self.train_layers[12]),
+#                                                          (grads_and_vars[13][0]*2, self.train_layers[13]),
+#                                                          (fcgrad*10, self.train_last_layer[0]),
+#                                                          (fbgrad*20, self.train_last_layer[1])],
+#                                                         global_step=global_step)
         else:
             return opt.apply_gradients([(fcgrad * 10, self.train_last_layer[0]),
                                         (fbgrad * 20, self.train_last_layer[1])], global_step=global_step)

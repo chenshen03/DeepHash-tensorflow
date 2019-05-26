@@ -4,7 +4,7 @@ import argparse
 import warnings
 import data_provider.image as dataset
 import model.dhn.dhn as model
-from util import Logger
+from util import Logger, str2bool
 
 
 label_dims = {'cifar10': 10, 'cub': 200, 'nuswide_21': 21,
@@ -21,30 +21,30 @@ def parse_args(argv):
       algorithm_group = parser.add_argument_group(title='Algorithm config')
       algorithm_group.add_argument('--output-dim', type=int, default=32)
       algorithm_group.add_argument('--cq-lambda', type=float, default=0.01)
-      algorithm_group.add_argument('--alpha', type=float, default=10) # 10.0 / 0.2
+      algorithm_group.add_argument('--alpha', type=float, default=10)
       # network config
       network_group = parser.add_argument_group(title='Network config')
       network_group.add_argument('--gpu_id', type=str, default='0')
       network_group.add_argument('--max-iter', type=int, default=10000)
-      network_group.add_argument('--batch-size', type=int, default=256)
+      network_group.add_argument('--batch-size', type=int, default=128)
       network_group.add_argument('--val-batch-size', type=int, default=100)
       network_group.add_argument('--decay-step', type=int, default=3000)
       network_group.add_argument('--learning-rate', type=float, default=0.0001)
       network_group.add_argument('--learning-rate-decay-factor', type=float, default=0.5)
       network_group.add_argument('--network', type=str, default='alexnet')
       network_group.add_argument('--network-weights', type=str)
-      network_group.add_argument('--finetune-all',  type=bool, default=True)
+      network_group.add_argument('--finetune-all', type=str2bool, default=True)
       network_group.add_argument('--test', default=False, action='store_true')
       network_group.add_argument('--debug', default=False, action='store_true')
       # dataset config
       dataset_group = parser.add_argument_group(title='Dataset config')
       dataset_group.add_argument('--dataset', type=str, default='cifar10')
-      dataset_group.add_argument('--prefix', type=str, default='dhn')
+      dataset_group.add_argument('--prefix', type=str, default='1')
       # config process
       config, rest = parser.parse_known_args()
       _dataset = config.dataset
-      _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.output_dim}bit_{config.prefix}/' + \
-            f'lambda{config.cq_lambda}_alpha{config.alpha}_lr{config.learning_rate}'
+      _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.output_dim}bit_dhn/' + \
+            f'{config.prefix}_lambda{config.cq_lambda}_alpha{config.alpha}'
       dataset_group.add_argument('--R', type=int, default=Rs[_dataset])
       dataset_group.add_argument('--label-dim', type=str, default=label_dims[_dataset])
       dataset_group.add_argument('--save-dir', type=str, default=_save_dir)

@@ -15,7 +15,7 @@ import tensorflow as tf
 
 from architecture import img_alexnet_layers
 from evaluation import MAPs
-from loss import cross_entropy_loss, quantization_loss
+from loss import pairwise_inner_product_loss, cosine_loss, quantization_loss
 from .util import Dataset
 
 
@@ -116,7 +116,7 @@ class DHCS(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = cross_entropy_loss(self.img_last_layer, self.img_label, self.alpha, True)
+        self.cos_loss = cosine_loss(self.img_last_layer, self.img_label, balanced=True)
         self.q_loss_img = quantization_loss(self.img_last_layer)
         self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
         self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
@@ -134,8 +134,8 @@ class DHCS(object):
         # for debug
         self.grads_and_vars = grads_and_vars
         tf.summary.scalar('loss', self.loss)
-        tf.summary.scalar('cos_loss', self.cos_loss)
-        tf.summary.scalar('q_loss', self.q_loss)
+        tf.summary.scalar('similar_loss', self.cos_loss)
+        tf.summary.scalar('quantization_loss', self.q_loss)
         tf.summary.scalar('lr', self.lr)
         self.merged = tf.summary.merge_all()
 

@@ -9,7 +9,7 @@ def norm(x, keepdims=False):
         keepdims: Whether keep dims or not
     Return: norm of matrix of shape (n1, n2, ..., n_{k-1})
     '''
-    return tf.sqrt(tf.reduce_sum(tf.square(x), axis=-1, keep_dims=keepdims))
+    return tf.sqrt(tf.reduce_sum(tf.square(x), axis=-1, keepdims=keepdims))
 
 def normed(x):
     '''
