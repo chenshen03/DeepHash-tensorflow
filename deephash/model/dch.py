@@ -16,6 +16,7 @@ import tensorflow as tf
 import model.plot as plot
 from architecture import img_alexnet_layers
 from evaluation import MAPs
+from data_provider.pairwise import Dataset
 
 
 class DCH(object):

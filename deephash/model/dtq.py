@@ -12,6 +12,7 @@ from sklearn.cluster import MiniBatchKMeans
 from architecture import img_alexnet_layers
 from distance.tfversion import distance
 from evaluation import MAPs_CQ
+from data_provider.triplet import Dataset
 
 
 class DTQ(object):

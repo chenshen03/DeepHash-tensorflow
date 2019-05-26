@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io as sio
 import warnings
 import data_provider.image as dataset
-import model.dvsq.dvsq as model
+import model.dvsq as model
 import sys
 from pprint import pprint
 import os

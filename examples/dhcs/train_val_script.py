@@ -3,7 +3,7 @@ import sys
 import argparse
 import warnings
 import data_provider.image as dataset
-import model.dhn as model
+import model.dhcs as model
 from util import Logger, str2bool
 
 
@@ -26,14 +26,14 @@ def parse_args(argv):
       network_group = parser.add_argument_group(title='Network config')
       network_group.add_argument('--gpu_id', type=str, default='0')
       network_group.add_argument('--max-iter', type=int, default=10000)
-      network_group.add_argument('--batch-size', type=int, default=128)
+      network_group.add_argument('--batch-size', type=int, default=256)
       network_group.add_argument('--val-batch-size', type=int, default=100)
       network_group.add_argument('--decay-step', type=int, default=3000)
       network_group.add_argument('--learning-rate', type=float, default=0.0001)
       network_group.add_argument('--learning-rate-decay-factor', type=float, default=0.5)
       network_group.add_argument('--network', type=str, default='alexnet')
       network_group.add_argument('--network-weights', type=str)
-      network_group.add_argument('--finetune-all', type=str2bool, default=True)
+      network_group.add_argument('--finetune-all',  type=str2bool, default=True)
       network_group.add_argument('--test', default=False, action='store_true')
       network_group.add_argument('--debug', default=False, action='store_true')
       # dataset config
@@ -43,7 +43,7 @@ def parse_args(argv):
       # config process
       config, rest = parser.parse_known_args()
       _dataset = config.dataset
-      _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.output_dim}bit_dhn/' + \
+      _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.output_dim}bit_dhcs/' + \
             f'{config.prefix}_lambda{config.cq_lambda}_alpha{config.alpha}'
       dataset_group.add_argument('--R', type=int, default=Rs[_dataset])
       dataset_group.add_argument('--label-dim', type=str, default=label_dims[_dataset])
@@ -60,7 +60,7 @@ def main(config):
 
       if not os.path.exists(config.save_dir):
             os.makedirs(config.save_dir)
-      sys.stdout = Logger(os.path.join(config.save_dir, 'train.log'))
+      sys.stdout = Logger(os.path.join(config.save_dir, 'test.log'))
     
       print(config)
       data_root = os.path.join('../../data', config.dataset)

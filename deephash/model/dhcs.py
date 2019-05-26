@@ -15,11 +15,11 @@ import tensorflow as tf
 
 from architecture import img_alexnet_layers
 from evaluation import MAPs
-from loss import cross_entropy, quantization_loss
-from .util import Dataset
+from loss import pairwise_inner_product_loss, cosine_loss, quantization_loss
+from data_provider.pairwise import Dataset
 
 
-class DHN(object):
+class DHCS(object):
     def __init__(self, config):
         # Initialize setting
         print("initializing")
@@ -64,7 +64,10 @@ class DHN(object):
             self.global_step = tf.Variable(0, trainable=False)
             self.train_op = self.apply_loss_function(self.global_step)
             self.sess.run(tf.global_variables_initializer())
-        return
+            
+            if config.debug == True:
+                from tensorflow.python import debug as tf_debug
+                self.sess = tf_debug.LocalCLIDebugWrapperSession(self.sess)
 
     def load_model(self):
         if self.network == 'alexnet':
@@ -113,7 +116,7 @@ class DHN(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = cross_entropy(self.img_last_layer, self.img_label, self.alpha, True)
+        self.cos_loss = cosine_loss(self.img_last_layer, self.img_label, balanced=True)
         self.q_loss_img = quantization_loss(self.img_last_layer)
         self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
         self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
@@ -131,8 +134,8 @@ class DHN(object):
         # for debug
         self.grads_and_vars = grads_and_vars
         tf.summary.scalar('loss', self.loss)
-        tf.summary.scalar('cos_loss', self.cos_loss)
-        tf.summary.scalar('q_loss', self.q_loss)
+        tf.summary.scalar('similar_loss', self.cos_loss)
+        tf.summary.scalar('quantization_loss', self.q_loss)
         tf.summary.scalar('lr', self.lr)
         self.merged = tf.summary.merge_all()
 
@@ -236,14 +239,14 @@ class DHN(object):
 
 
 def train(train_img, config):
-    model = DHN(config)
+    model = DHCS(config)
     img_dataset = Dataset(train_img, config.output_dim)
     model.train(img_dataset)
     return model.save_file
 
 
 def validation(database_img, query_img, config):
-    model = DHN(config)
+    model = DHCS(config)
     img_database = Dataset(database_img, config.output_dim)
     img_query = Dataset(query_img, config.output_dim)
     return model.validation(img_query, img_database, config.R)

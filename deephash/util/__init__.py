@@ -15,6 +15,15 @@ class Logger(object):
         self.terminal.flush()
 
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Unsupported value encountered.')
+
+
 # return -1 if x < 0, 1 if x > 0, random -1 or 1 if x ==0
 def sign(x):
     s = np.sign(x)

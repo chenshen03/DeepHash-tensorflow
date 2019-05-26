@@ -17,7 +17,7 @@ from sklearn.cluster import MiniBatchKMeans
 
 from architecture import img_alexnet_layers
 from evaluation import MAPs_CQ
-from .util import Dataset
+from data_provider.pq import Dataset
 
 
 class DVSQ(object):

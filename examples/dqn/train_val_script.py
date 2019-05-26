@@ -3,7 +3,7 @@ import sys
 import argparse
 import warnings
 import data_provider.image as dataset
-import model.dqn.dqn as model
+import model.dqn as model
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
