@@ -1,18 +1,19 @@
 import tensorflow as tf
 import numpy as np
 from distance.tfversion import distance
+from util import sign
 
 
 '''pairwise loss
 '''
 
-def pairwise_inner_product_loss(u, label_u):
+def inner_product_loss(u, label_u):
     '''pairwise inner product loss
     - Hash with graph
     - Supervised Hashing for Image Retrieval via Image Representation Learning
     - Deep Discrete Supervised Hashing
     '''
-    with tf.name_scope('pairwise_inner_product_loss'):
+    with tf.name_scope('inner_product_loss'):
         def reduce_shaper(t):
             return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
 
@@ -22,10 +23,10 @@ def pairwise_inner_product_loss(u, label_u):
 
         B = tf.cast(tf.shape(u)[1], tf.float32)
         ip = tf.matmul(u, u, transpose_b=True)
-        loss = tf.reduce_mean(tf.square(tf.subtract(Sim, tf.multiply(B, ip))))
+        loss = tf.reduce_mean(tf.square(tf.subtract(Sim, tf.div(ip, B))))
     return loss
 
-def cosine_loss(u, label_u, balanced=False):
+def cosine_loss(u, label_u, balanced=True):
     '''squared pairwise cosine loss
     - Deep Quantization Network for Efficient Image Retrieval
     '''
@@ -191,6 +192,7 @@ def quantization_loss(z, L2=True):
 
 def pq_loss(z, h, C, squared=False):
     '''product quantization loss
+    - Deep Quantization Network for Efficient Image Retrieval
     - Deep Triplet Quantization
     '''
     with tf.name_scope('pq_loss'):
@@ -208,7 +210,19 @@ def pq_loss(z, h, C, squared=False):
 '''
 
 
-'''orthogonal and variance loss
+'''independence and balance loss
 - Deep semantic ranking based hashing for multi-label image retrieval
 - Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
 '''
+
+def balance_loss(u):
+    '''balance loss
+
+    Each bit should be half 0 and half 1.
+    - Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
+    '''
+    with tf.name_scope('balance_loss'):
+        H = sign(u)
+        H_mean = tf.reduce_mean(H, axis=1)
+        loss = tf.reduce_mean(tf.square(H_mean))
+    return loss
