@@ -7,10 +7,10 @@ import model.dhcs as model
 from util import Logger, str2bool
 
 
-label_dims = {'cifar10': 10, 'cub': 200, 'nuswide_21': 21,
+label_dims = {'cifar10': 10, 'cifar10-s1': 10, 'cub': 200, 'nuswide_21': 21,
               'nuswide_81': 81, 'coco': 80, 'imagenet': 100, 'cifar10_zero_shot': 10}
 
-Rs = {'cifar10': 54000, 'nuswide_81': 5000, 'coco': 5000,
+Rs = {'cifar10': 54000, 'cifar10-s1': 50000, 'nuswide_81': 5000, 'coco': 5000,
       'nuswide_21': 5000, 'imagenet': 5000, 'cifar10_zero_shot': 15000}
 
 
@@ -26,7 +26,7 @@ def parse_args(argv):
       network_group = parser.add_argument_group(title='Network config')
       network_group.add_argument('--gpu_id', type=str, default='0')
       network_group.add_argument('--max-iter', type=int, default=10000)
-      network_group.add_argument('--batch-size', type=int, default=256)
+      network_group.add_argument('--batch-size', type=int, default=128)
       network_group.add_argument('--val-batch-size', type=int, default=100)
       network_group.add_argument('--decay-step', type=int, default=3000)
       network_group.add_argument('--learning-rate', type=float, default=0.0001)

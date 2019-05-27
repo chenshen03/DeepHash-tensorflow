@@ -7,10 +7,10 @@ import model.dhn as model
 from util import Logger, str2bool
 
 
-label_dims = {'cifar10': 10, 'cub': 200, 'nuswide_21': 21,
+label_dims = {'cifar10': 10, 'cifar10-s1': 10, 'cub': 200, 'nuswide_21': 21,
               'nuswide_81': 81, 'coco': 80, 'imagenet': 100, 'cifar10_zero_shot': 10}
 
-Rs = {'cifar10': 54000, 'nuswide_81': 5000, 'coco': 5000,
+Rs = {'cifar10': 54000, 'cifar10-s1': 50000, 'nuswide_81': 5000, 'coco': 5000,
       'nuswide_21': 5000, 'imagenet': 5000, 'cifar10_zero_shot': 15000}
 
 

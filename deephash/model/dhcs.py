@@ -15,7 +15,7 @@ import tensorflow as tf
 
 from architecture import img_alexnet_layers
 from evaluation import MAPs
-from loss import pairwise_inner_product_loss, cosine_loss, quantization_loss
+from loss import *
 from data_provider.pairwise import Dataset
 
 
@@ -116,10 +116,8 @@ class DHCS(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = cosine_loss(self.img_last_layer, self.img_label, balanced=True)
-        self.q_loss_img = quantization_loss(self.img_last_layer)
-        self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
-        self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
+        self.cos_loss = inner_product_loss(self.img_last_layer, self.img_label)
+        self.q_loss = self.cq_lambda * quantization_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_loss
 
         # Last layer has a 10 times learning rate
@@ -172,9 +170,6 @@ class DHCS(object):
         for train_iter in range(self.max_iter):
             images, labels = img_dataset.next_batch(self.batch_size)
             start_time = time.time()
-
-            assign_lambda = self.q_lambda.assign(self.cq_lambda)
-            self.sess.run([assign_lambda])
 
             _, loss, cos_loss, q_loss, output, summary = self.sess.run(
                 [self.train_op, self.loss, self.cos_loss, self.q_loss, self.img_last_layer, self.merged],
