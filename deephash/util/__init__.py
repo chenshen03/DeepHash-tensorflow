@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import tensorflow as tf
 
 
 class Logger(object):
@@ -30,6 +31,10 @@ def sign(x):
     tmp = s[s == 0]
     s[s==0] = np.random.choice([-1, 1], tmp.shape)
     return s
+
+
+def reduce_shaper(t):
+    return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
 
 
 if __name__ == "__main__":
