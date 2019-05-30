@@ -34,6 +34,7 @@ def inner_product_loss(u, label_u, balanced=True):
         loss = tf.reduce_mean(loss_1)
     return loss
 
+
 def cosine_loss(u, label_u, balanced=True):
     '''squared pairwise cosine loss
     - Deep Quantization Network for Efficient Image Retrieval
@@ -60,6 +61,7 @@ def cosine_loss(u, label_u, balanced=True):
 
         loss = tf.reduce_mean(loss_1)
     return loss  
+
 
 def cross_entropy_loss(u, label_u, alpha=0.5, normed=True, balanced=True):
     '''cross entropy loss
@@ -91,6 +93,7 @@ def cross_entropy_loss(u, label_u, alpha=0.5, normed=True, balanced=True):
 
         loss = tf.reduce_mean(loss_1)
     return loss
+
 
 def cauchy_cross_entropy_loss(u, label_u, v=None, label_v=None, output_dim=300, gamma=1, normed=True):
     '''cauchy cross entropy loss
@@ -135,6 +138,7 @@ def cauchy_cross_entropy_loss(u, label_u, v=None, label_v=None, output_dim=300, 
         loss = tf.reduce_mean(tf.multiply(all_loss, balance_p_mask))
     return loss
 
+
 def contrastive_loss(u, label_u, margin=4, balanced=False):
     '''contrastive loss
     - Deep Supervised Hashing for Fast Image Retrieval
@@ -147,6 +151,7 @@ def contrastive_loss(u, label_u, margin=4, balanced=False):
         loss_1 = S * dist + (1 - S) * tf.maximum(margin - dist, 0.0)
 
         if balanced:
+            # TODO DELETTE! In this setting, results will be worse.
             with tf.name_scope('balance'):
                 # let Sim \in {-1, 1}
                 Sim = tf.multiply(tf.add(S, tf.constant(-0.5)), tf.constant(2.0))
@@ -179,6 +184,80 @@ def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
     return loss
 
 
+def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, margin=0.7):
+    '''cosine margin multi label loss
+    - Deep Visual-Semantic Quantization for Efficient Image Retrieval
+    '''
+    # N: batchsize, L: label_dim, D: 300
+    # u: N * D
+    # label_u: N * L
+    # wordvec: L * D
+    with tf.name_scope('cos_margin_multi_label_loss'):
+        assert output_dim == 300
+
+        batch_size = tf.cast(tf.shape(label_u)[0], tf.float32)
+        n_class = tf.cast(tf.shape(label_u)[1], tf.float32)
+        if soft == True:
+            ip_2 = tf.matmul(u, wordvec, transpose_b=True)
+            # multiply ids to inner product
+            mod_2 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(
+                u)), reduce_shaper(tf.square(wordvec)), transpose_b=True))
+            # cos_2: N * L
+            cos_2 = tf.div(ip_2, mod_2)
+
+            # ip_3: L * L
+            # compute soft margin
+            ip_3 = tf.matmul(wordvec, wordvec, transpose_b=True)
+            # use word_dic to avoid 0 in /
+            mod_3 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(
+                wordvec)), reduce_shaper(tf.square(wordvec)), transpose_b=True))
+            margin_param = tf.subtract(tf.constant(
+                1.0, dtype=tf.float32), tf.div(ip_3, mod_3))
+
+            # cos - cos: N * L * L
+            cos_cos_1 = tf.subtract(tf.expand_dims(margin_param, 0), tf.subtract(
+                tf.expand_dims(cos_2, 2), tf.expand_dims(cos_2, 1)))
+            # we need to let the wrong place be 0
+            cos_cos = tf.multiply(cos_cos_1, tf.expand_dims(label_u, 2))
+
+            cos_loss = tf.reduce_sum(tf.maximum(
+                tf.constant(0, dtype=tf.float32), cos_cos))
+            loss = tf.div(cos_loss, tf.multiply(n_class, tf.reduce_sum(label_u)))
+        else:
+            margin_param = tf.constant(margin, dtype=tf.float32)
+
+            # v_label: N * L * D
+            v_label = tf.multiply(tf.expand_dims(label_u, 2), tf.expand_dims(wordvec, 0))
+            # ip_1: N * L
+            ip_1 = tf.reduce_sum(tf.multiply(tf.expand_dims(u, 1), v_label), 2)
+            # mod_1: N * L
+            v_label_mod = tf.multiply(tf.expand_dims(
+                tf.ones([batch_size, n_class]), 2), tf.expand_dims(wordvec, 0))
+            mod_1 = tf.sqrt(tf.multiply(tf.expand_dims(tf.reduce_sum(
+                tf.square(u), 1), 1), tf.reduce_sum(tf.square(v_label_mod), 2)))
+            # cos_1: N * L
+            cos_1 = tf.div(ip_1, mod_1)
+
+            ip_2 = tf.matmul(u, wordvec, transpose_b=True)
+            # multiply ids to inner product
+            mod_2 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(
+                u)), reduce_shaper(tf.square(word_dict)), transpose_b=True))
+            # cos_2: N * L
+            cos_2 = tf.div(ip_2, mod_2)
+
+            # cos - cos: N * L * L
+            cos_cos_1 = tf.subtract(margin_param, tf.subtract(
+                tf.expand_dims(cos_1, 2), tf.expand_dims(cos_2, 1)))
+            # we need to let the wrong place be 0
+            cos_cos = tf.multiply(cos_cos_1, tf.expand_dims(label_u, 2))
+
+            cos_loss = tf.reduce_sum(tf.maximum(
+                tf.constant(0, dtype=tf.float32), cos_cos))
+            loss = tf.div(cos_loss, tf.multiply(tf.constant(
+                n_class, dtype=tf.float32), tf.reduce_sum(label_u)))       
+    return loss
+
+
 '''listwise loss
 - Hashing as Tie-Aware Learning to Rank
 '''
@@ -201,6 +280,7 @@ def quantization_loss(z, L2=True):
             loss = tf.reduce_mean(tf.abs(tf.subtract(tf.abs(z), tf.constant(1.0))))
     return loss
 
+
 def cauchy_quantization_loss(z):
     '''quantization loss
     - Deep Cauchy Hashing for Hamming Space Retrieval
@@ -209,16 +289,23 @@ def cauchy_quantization_loss(z):
         pass
     return loss    
 
-def pq_loss(z, h, C, squared=False):
+
+def pq_loss(z, h, C, wordvec=None, squared=True):
     '''product quantization loss
     - Deep Quantization Network for Efficient Image Retrieval
+    - Deep Visual-Semantic Quantization for Efficient Image Retrieval
     - Deep Triplet Quantization
     '''
     with tf.name_scope('pq_loss'):
+        dist = z - tf.matmul(h, C)
+
+        if wordvec != None:
+            dist = tf.matmul(dist, wordvec, transpose_b=True)
+
         if squared:
-            loss = tf.reduce_mean(tf.reduce_sum(tf.square(z - tf.matmul(h, C)), 1))
-        else:
-            loss = tf.reduce_mean(tf.reduce_sum(z - tf.matmul(h, C), 1))
+            dist = tf.square(dist)
+
+        loss = tf.reduce_mean(tf.reduce_sum(dist, 1))
     return loss
 
 
@@ -241,7 +328,6 @@ def balance_loss(u):
     - Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
     '''
     with tf.name_scope('balance_loss'):
-        H = tf.sign(u)
-        H_mean = tf.reduce_mean(H, axis=1)
+        H_mean = tf.reduce_mean(tf.sign(u), axis=1)
         loss = tf.reduce_mean(tf.square(H_mean))
     return loss
