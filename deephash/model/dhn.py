@@ -41,7 +41,7 @@ class DHN(object):
 
         self.finetune_all = config.finetune_all
 
-        self.save_file = os.path.join(config.save_dir, 'network_weights.npy')
+        self.model_file = os.path.join(config.save_dir, 'network_weights.npy')
         self.codes_file = os.path.join(config.save_dir, 'codes.npy')
         self.tflog_path = os.path.join(config.save_dir, 'tflog')
 
@@ -80,7 +80,7 @@ class DHN(object):
 
     def save_model(self, model_file=None):
         if model_file is None:
-            model_file = self.save_file
+            model_file = self.model_file
         model = {}
         for layer in self.deep_param_img:
             model[layer] = self.sess.run(self.deep_param_img[layer])
@@ -237,7 +237,7 @@ def train(train_img, config):
     model = DHN(config)
     img_dataset = Dataset(train_img, config.output_dim)
     model.train(img_dataset)
-    return model.save_file
+    return model.model_file
 
 
 def validation(database_img, query_img, config):

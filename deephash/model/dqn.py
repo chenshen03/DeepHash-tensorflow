@@ -17,8 +17,8 @@ from sklearn.cluster import MiniBatchKMeans
 
 from architecture import img_alexnet_layers
 from evaluation import MAPs_CQ
-from loss import cosine_loss, pq_loss
 from data_provider.pq import Dataset
+from loss import cosine_loss, pq_loss
 
 
 class DQN(object):
@@ -27,7 +27,7 @@ class DQN(object):
         print("initializing")
         np.set_printoptions(precision=4)
         self.stage = tf.placeholder_with_default(tf.constant(0), [])
-        self.device = '/gpu:' + str(config.gpu)
+        self.device = '/gpu:' + config.gpu_id
         self.output_dim = config.output_dim
         self.n_class = config.label_dim
 
@@ -41,25 +41,16 @@ class DQN(object):
         self.batch_size = config.batch_size
         self.val_batch_size = config.val_batch_size
         self.max_iter = config.max_iter
-        self.img_model = config.img_model
+        self.network = config.network
         self.learning_rate = config.learning_rate
         self.learning_rate_decay_factor = config.learning_rate_decay_factor
         self.decay_step = config.decay_step
 
         self.finetune_all = config.finetune_all
 
-        self.file_name = 'lr{}_cq{}_ss{}_sc{}_d{}_{}'.format(
-            self.learning_rate,
-            self.cq_lambda,
-            self.subspace_num,
-            self.subcenter_num,
-            self.output_dim,
-            config.dataset)
-        self.save_dir = os.path.join(
-            config.save_dir, self.file_name + '.npy')
-        self.codes_file = os.path.join(
-            config.save_dir, self.file_name + '_codes.npy')
-        self.log_dir = config.log_dir
+        self.model_file = os.path.join(config.save_dir, 'network_weights.npy')
+        self.codes_file = os.path.join(config.save_dir, 'codes.npy')
+        self.tflog_path = os.path.join(config.save_dir, 'tflog')
 
         # Setup session
         print("launching session")
@@ -71,12 +62,10 @@ class DQN(object):
         # Create variables and placeholders
 
         with tf.device(self.device):
-            self.img = tf.placeholder(
-                tf.float32, [None, 256, 256, 3])
-            self.img_label = tf.placeholder(
-                tf.float32, [None, self.n_class])
+            self.img = tf.placeholder(tf.float32, [None, 256, 256, 3])
+            self.img_label = tf.placeholder(tf.float32, [None, self.n_class])
 
-            self.model_weights = config.model_weights 
+            self.network_weights = config.network_weights 
             self.img_last_layer, self.deep_param_img, self.train_layers, self.train_last_layer = self.load_model()
 
             self.C = tf.Variable(tf.random_uniform([self.subspace_num * self.subcenter_num, self.output_dim],
@@ -85,10 +74,8 @@ class DQN(object):
 
             # Centers shared in different modalities (image & text)
             # Binary codes for different modalities (image & text)
-            self.img_output_all = tf.placeholder(
-                tf.float32, [None, self.output_dim])
-            self.img_b_all = tf.placeholder(
-                tf.float32, [None, self.subspace_num * self.subcenter_num])
+            self.img_output_all = tf.placeholder(tf.float32, [None, self.output_dim])
+            self.img_b_all = tf.placeholder(tf.float32, [None, self.subspace_num * self.subcenter_num])
 
             self.b_img = tf.placeholder(tf.float32, [None, self.subspace_num * self.subcenter_num])
             self.ICM_m = tf.placeholder(tf.int32, [])
@@ -97,8 +84,8 @@ class DQN(object):
             self.ICM_X = tf.placeholder(tf.float32, [self.code_batch_size, self.output_dim])
             self.ICM_C_m = tf.slice(self.C, [self.ICM_m * self.subcenter_num, 0], [self.subcenter_num, self.output_dim])
             self.ICM_X_residual = self.ICM_X - tf.matmul(self.ICM_b_all, self.C) + tf.matmul(self.ICM_b_m, self.ICM_C_m)
-            ICM_X_expand = tf.expand_dims(self.ICM_X_residual, 1)
-            ICM_C_m_expand = tf.expand_dims(self.ICM_C_m, 0)
+            ICM_X_expand = tf.expand_dims(self.ICM_X_residual, 1)  # N * 1 * D
+            ICM_C_m_expand = tf.expand_dims(self.ICM_C_m, 0)  # 1 * M * D
             # N*sc*D  *  D*n
             ICM_sum_squares = tf.reduce_sum(tf.square(tf.squeeze(
                 tf.subtract(ICM_X_expand, ICM_C_m_expand))), reduction_indices=2)
@@ -109,20 +96,23 @@ class DQN(object):
             self.global_step = tf.Variable(0, trainable=False)
             self.train_op = self.apply_loss_function(self.global_step)
             self.sess.run(tf.global_variables_initializer())
-        return
+
+            if config.debug == True:
+                from tensorflow.python import debug as tf_debug
+                self.sess = tf_debug.LocalCLIDebugWrapperSession(self.sess)
 
     def load_model(self):
-        if self.img_model == 'alexnet':
+        if self.network == 'alexnet':
             img_output = img_alexnet_layers(
                 self.img, self.batch_size, self.output_dim,
-                self.stage, self.model_weights, val_batch_size=self.val_batch_size)
+                self.stage, self.network_weights, val_batch_size=self.val_batch_size)
         else:
-            raise Exception('cannot use such CNN model as ' + self.img_model)
+            raise Exception('cannot use such CNN model as ' + self.network)
         return img_output
 
     def save_model(self, model_file=None):
         if model_file is None:
-            model_file = self.save_dir
+            model_file = self.model_file
         model = {}
         for layer in self.deep_param_img:
             model[layer] = self.sess.run(self.deep_param_img[layer])
@@ -148,7 +138,6 @@ class DQN(object):
     def save_codes(self, database, query, C, codes_file=None):
         if codes_file is None:
             codes_file = self.codes_file
-            # model_file = self.model_weights + "_codes.npy"
         codes = {
             'db_features': database.output,
             'db_codes': database.codes,
@@ -165,9 +154,7 @@ class DQN(object):
     def apply_loss_function(self, global_step):
         # loss function
         self.cos_loss = cosine_loss(self.img_last_layer, self.img_label)
-        self.q_loss_img = pq_loss(self.img_last_layer, self.b_img, self.C)
-        self.q_lambda = tf.Variable(self.cq_lambda, name='cq_lambda')
-        self.q_loss = tf.multiply(self.q_lambda, self.q_loss_img)
+        self.q_loss = self.cq_lambda * pq_loss(self.img_last_layer, self.b_img, self.C)
         self.loss = self.cos_loss + self.q_loss
 
         # Last layer has a 10 times learning rate
@@ -187,7 +174,6 @@ class DQN(object):
         tf.summary.scalar('lr', self.lr)
         self.merged = tf.summary.merge_all()
 
-        # weight层的学习率是bias层的学习率2倍
         if self.finetune_all:
             return opt.apply_gradients([(grads_and_vars[0][0], self.train_layers[0]),
                                                          (grads_and_vars[1][0]*2, self.train_layers[1]),
@@ -204,11 +190,10 @@ class DQN(object):
                                                          (grads_and_vars[12][0], self.train_layers[12]),
                                                          (grads_and_vars[13][0]*2, self.train_layers[13]),
                                                          (fcgrad*10, self.train_last_layer[0]),
-                                                         (fbgrad*20, self.train_last_layer[1])],
-                                                        global_step=global_step)
+                                                         (fbgrad*20, self.train_last_layer[1])], global_step=global_step)
         else:
-            return opt.apply_gradients([(fcgrad * 10, self.train_last_layer[0]),
-                                        (fbgrad * 20, self.train_last_layer[1])], global_step=global_step)
+            return opt.apply_gradients([(fcgrad*10, self.train_last_layer[0]),
+                                        (fbgrad*20, self.train_last_layer[1])], global_step=global_step)
 
     def initial_centers(self, img_output):
         C_init = np.zeros(
@@ -217,15 +202,10 @@ class DQN(object):
         all_output = img_output
         div = int(self.output_dim / self.subspace_num)
         for i in range(self.subspace_num):
-            # TODO debug
-            try:
-                kmeans = MiniBatchKMeans(n_clusters=self.subcenter_num).fit(all_output[:, i * div: (i + 1) * div])
-                C_init[i * self.subcenter_num: (i + 1) * self.subcenter_num, i * div: (i + 1) * div] = kmeans.cluster_centers_
-                print("step: ", i, " finish")
-            except Exception as e:
-                print(e)
-                import pdb; pdb.set_trace()
-                # raise
+            kmeans = MiniBatchKMeans(n_clusters=self.subcenter_num).fit(
+                all_output[:, i * div: (i + 1) * div])
+            C_init[i * self.subcenter_num: (i + 1) * self.subcenter_num, i * div: (i + 1) * div] = kmeans.cluster_centers_
+            print("step: ", i, " finish")
         return C_init
 
     def update_centers(self, img_dataset):
@@ -236,6 +216,7 @@ class DQN(object):
             but all the C need to be replace with C^T :
             self.C = (hu * hu^T + hv * hv^T)^{-1} (hu^T * U + hv^T * V)
         '''
+        print("#DQN train# updating Centers")
         old_C_value = self.sess.run(self.C)
 
         h = self.img_b_all
@@ -305,39 +286,38 @@ class DQN(object):
         epoch_iter = int(ceil(img_dataset.n_samples / self.batch_size))
 
         # tensorboard
-        tflog_path = os.path.join(self.log_dir, self.file_name)
-        if os.path.exists(tflog_path):
-            shutil.rmtree(tflog_path)
-        train_writer = tf.summary.FileWriter(tflog_path, self.sess.graph)
+        if os.path.exists(self.tflog_path):
+            shutil.rmtree(self.tflog_path)
+        train_writer = tf.summary.FileWriter(self.tflog_path, self.sess.graph)
 
         for train_iter in range(self.max_iter):
             images, labels, codes = img_dataset.next_batch(self.batch_size)
             start_time = time.time()
-
-            if epoch > 0:
-                assign_lambda = self.q_lambda.assign(self.cq_lambda)
-            else:
-                assign_lambda = self.q_lambda.assign(0.0)
-            self.sess.run([assign_lambda])
 
             _, loss, output, summary = self.sess.run([self.train_op, self.loss, self.img_last_layer, self.merged],
                                                      feed_dict={self.img: images,
                                                                 self.img_label: labels,
                                                                 self.b_img: codes})
 
-            train_writer.add_summary(summary, train_iter)
-
             img_dataset.feed_batch_output(self.batch_size, output)
             duration = time.time() - start_time
 
             # every epoch: update codes and centers
-            if train_iter % (2 * epoch_iter) == 0 and train_iter != 0:
+            if train_iter % (1 * epoch_iter) == 0 and train_iter != 0:
+                if epoch == 0:
+                    with tf.device(self.device):
+                        for i in range(self.max_iter_update_Cb):
+                            self.sess.run(self.C.assign(
+                                self.initial_centers(img_dataset.output)))
+
                 epoch = epoch + 1
                 for i in range(self.max_iter_update_Cb):
-                    self.sess.run(self.C.assign(
-                        self.initial_centers(img_dataset.output)))
                     self.update_codes_batch(img_dataset, self.code_batch_size)
-            if train_iter % 50 == 0:
+                    self.update_centers(img_dataset)
+                    # self.sess.run(self.C.assign(self.initial_centers(img_dataset.output)))
+                    
+            if train_iter % 1 == 0:
+                train_writer.add_summary(summary, train_iter)
                 print("%s #train# epoch %2d step %4d, loss = %.4f, %.1f sec/batch"
                       % (datetime.now(), epoch, train_iter + 1, loss, duration))
 
@@ -396,16 +376,13 @@ class DQN(object):
 
 def train(train_img, config):
     model = DQN(config)
-    img_dataset = Dataset(
-        train_img, config.output_dim, config.n_subspace * config.n_subcenter)
+    img_dataset = Dataset(train_img, config.output_dim, config.n_subspace * config.n_subcenter)
     model.train(img_dataset)
-    return model.save_dir
+    return model.model_file
 
 
 def validation(database_img, query_img, config):
     model = DQN(config)
-    img_database = Dataset(
-        database_img, config.output_dim, config.n_subspace * config.n_subcenter)
-    img_query = Dataset(
-        query_img, config.output_dim, config.n_subspace * config.n_subcenter)
+    img_database = Dataset(database_img, config.output_dim, config.n_subspace * config.n_subcenter)
+    img_query = Dataset(query_img, config.output_dim, config.n_subspace * config.n_subcenter)
     return model.validation(img_database, img_query, config.R)
