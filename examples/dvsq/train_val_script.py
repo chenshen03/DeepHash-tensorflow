@@ -4,6 +4,7 @@ import argparse
 import warnings
 import data_provider.image as dataset
 import model.dvsq as model
+from pprint import pprint
 from util import Logger, str2bool
 
 
@@ -71,7 +72,7 @@ def main(config):
         os.makedirs(config.save_dir)
     sys.stdout = Logger(os.path.join(config.save_dir, 'train.log'))
 
-    print(config)
+    pprint(vars(args))
     data_root = os.path.join('../../data', config.dataset)
     config.wordvec_dict = f'{data_root}/wordvec.txt'
     img_tr = f'{data_root}/train.txt'

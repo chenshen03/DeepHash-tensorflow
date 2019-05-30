@@ -132,7 +132,6 @@ class DCH(object):
     def apply_loss_function(self, global_step):
         ### loss function
         self.cos_loss = self.cauchy_cross_entropy(self.img_last_layer, self.img_label, gamma=self.gamma, normed=False)
-
         self.q_loss_img = tf.reduce_mean(tf.square(tf.subtract(tf.abs(self.img_last_layer), tf.constant(1.0))))
         self.q_loss = self.q_lambda * self.q_loss_img
         self.loss = self.cos_loss + self.q_loss
@@ -258,3 +257,16 @@ class DCH(object):
             'i2i_map_radius_2': mmap,
         }
 
+
+def train(train_img, config):
+    model = DCH(config)
+    img_dataset = Dataset(train_img, config.output_dim)
+    model.train(img_dataset)
+    return model.model_file
+
+
+def validation(database_img, query_img, config):
+    model = DCH(config)
+    img_database = Dataset(database_img, config.output_dim)
+    img_query = Dataset(query_img, config.output_dim)
+    return model.validation(img_query, img_database, config.R)

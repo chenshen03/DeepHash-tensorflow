@@ -327,7 +327,7 @@ class DQN(object):
 
         self.sess.close()
 
-    def validation(self, img_database, img_query, R=100):
+    def validation(self, img_query, img_database, R=100):
         if os.path.exists(self.codes_file):
             print("loading ", self.codes_file)
             img_database, img_query, C_tmp = self.load_codes(self.codes_file)
@@ -385,4 +385,4 @@ def validation(database_img, query_img, config):
     model = DQN(config)
     img_database = Dataset(database_img, config.output_dim, config.n_subspace * config.n_subcenter)
     img_query = Dataset(query_img, config.output_dim, config.n_subspace * config.n_subcenter)
-    return model.validation(img_database, img_query, config.R)
+    return model.validation(img_query, img_database, config.R)

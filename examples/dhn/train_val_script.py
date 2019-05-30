@@ -4,6 +4,7 @@ import argparse
 import warnings
 import data_provider.image as dataset
 import model.dhn as model
+from pprint import pprint
 from util import Logger, str2bool
 
 
@@ -62,7 +63,7 @@ def main(config):
         os.makedirs(config.save_dir)
     sys.stdout = Logger(os.path.join(config.save_dir, 'train.log'))
 
-    print(config)
+    pprint(vars(config))
     data_root = os.path.join('../../data', config.dataset)
     img_tr = f'{data_root}/train.txt'
     img_te = f'{data_root}/test.txt'

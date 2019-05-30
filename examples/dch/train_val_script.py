@@ -35,11 +35,10 @@ tanh_parser.add_argument('--without-tanh', dest='with_tanh', action='store_false
 parser.set_defaults(with_tanh=True)
 
 parser.add_argument('--img-model', default='alexnet', type=str)
-parser.add_argument('--model-weights', type=str,
-                    default='../../DeepHash/architecture/pretrained_model/reference_pretrain.npy')
+parser.add_argument('--model-weights', type=str)
 parser.add_argument('--finetune-all', default=True, type=bool)
 parser.add_argument('--save-dir', default="./models/", type=str)
-parser.add_argument('--data-dir', default="~/data/", type=str)
+parser.add_argument('--data-dir', default="../../data/", type=str)
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true')
 
 args = parser.parse_args()
@@ -62,7 +61,7 @@ query_img, database_img = dataset.import_validation(data_root, args.img_te, args
 
 if not args.evaluate:
     train_img = dataset.import_train(data_root, args.img_tr)
-    model_weights = model.train(train_img, database_img, query_img, args)
+    model_weights = model.train(train_img, args)
     args.model_weights = model_weights
 
 maps = model.validation(database_img, query_img, args)
