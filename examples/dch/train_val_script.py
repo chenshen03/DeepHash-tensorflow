@@ -13,21 +13,21 @@ warnings.filterwarnings("ignore", category = FutureWarning)
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-parser = argparse.ArgumentParser(description='Triplet Hashing')
+parser = argparse.ArgumentParser(description='Deep Cauchy Hashing')
 parser.add_argument('--lr', '--learning-rate', default=0.005, type=float)
-parser.add_argument('--output-dim', default=64, type=int)   # 256, 128
+parser.add_argument('--output-dim', default=32, type=int)   # 256, 128
 parser.add_argument('--alpha', default=0.5, type=float)
 parser.add_argument('--bias', default=0.0, type=float)
 parser.add_argument('--gamma', default=20, type=float)
-parser.add_argument('--iter-num', default=2000, type=int)
-parser.add_argument('--q-lambda', default=0, type=float)
+parser.add_argument('--iter-num', default=10000, type=int)
+parser.add_argument('--q-lambda', default=0.001, type=float)
 parser.add_argument('--dataset', default='cifar10', type=str)
 parser.add_argument('--gpus', default='0', type=str)
 parser.add_argument('--log-dir', default='tflog', type=str)
 parser.add_argument('-b', '--batch-size', default=128, type=int)
-parser.add_argument('-vb', '--val-batch-size', default=16, type=int)
-parser.add_argument('--decay-step', default=10000, type=int)
-parser.add_argument('--decay-factor', default=0.1, type=float)
+parser.add_argument('-vb', '--val-batch-size', default=100, type=int)
+parser.add_argument('--decay-step', default=3000, type=int)
+parser.add_argument('--decay-factor', default=0.5, type=float)
 
 tanh_parser = parser.add_mutually_exclusive_group(required=False)
 tanh_parser.add_argument('--with-tanh', dest='with_tanh', action='store_true')

@@ -95,14 +95,13 @@ def cross_entropy_loss(u, label_u, alpha=0.5, normed=True, balanced=True):
     return loss
 
 
-def cauchy_cross_entropy_loss(u, label_u, v=None, label_v=None, output_dim=300, gamma=1, normed=True):
+def cauchy_cross_entropy_loss(u, label_u, output_dim=300, gamma=1, normed=True):
     '''cauchy cross entropy loss
     - Deep Cauchy Hashing for Hamming Space Retrieval
     '''
     with tf.name_scope('cauchy_cross_entropy_loss'):
-        if v is None:
-            v = u
-            label_v = label_u
+        v = u
+        label_v = label_u
 
         if normed:
             ip_1 = tf.matmul(u, tf.transpose(v))
@@ -195,8 +194,8 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, 
     with tf.name_scope('cos_margin_multi_label_loss'):
         assert output_dim == 300
 
-        batch_size = tf.cast(tf.shape(label_u)[0], tf.float32)
-        n_class = tf.cast(tf.shape(label_u)[1], tf.float32)
+        batch_size = tf.cast(tf.shape(label_u)[0], tf.int32)
+        n_class = tf.cast(tf.shape(label_u)[1], tf.int32)
         if soft == True:
             ip_2 = tf.matmul(u, wordvec, transpose_b=True)
             # multiply ids to inner product
@@ -222,7 +221,8 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, 
 
             cos_loss = tf.reduce_sum(tf.maximum(
                 tf.constant(0, dtype=tf.float32), cos_cos))
-            loss = tf.div(cos_loss, tf.multiply(n_class, tf.reduce_sum(label_u)))
+            loss = tf.div(cos_loss, tf.multiply(tf.cast(
+                n_class, dtype=tf.float32), tf.reduce_sum(label_u)))  
         else:
             margin_param = tf.constant(margin, dtype=tf.float32)
 
@@ -241,7 +241,7 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, 
             ip_2 = tf.matmul(u, wordvec, transpose_b=True)
             # multiply ids to inner product
             mod_2 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(
-                u)), reduce_shaper(tf.square(word_dict)), transpose_b=True))
+                u)), reduce_shaper(tf.square(wordvec)), transpose_b=True))
             # cos_2: N * L
             cos_2 = tf.div(ip_2, mod_2)
 
@@ -253,7 +253,7 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, 
 
             cos_loss = tf.reduce_sum(tf.maximum(
                 tf.constant(0, dtype=tf.float32), cos_cos))
-            loss = tf.div(cos_loss, tf.multiply(tf.constant(
+            loss = tf.div(cos_loss, tf.multiply(tf.cast(
                 n_class, dtype=tf.float32), tf.reduce_sum(label_u)))       
     return loss
 
@@ -287,7 +287,7 @@ def cauchy_quantization_loss(z):
     '''
     with tf.name_scope('cauchy_quantization_loss'):
         pass
-    return loss    
+    return     
 
 
 def pq_loss(z, h, C, wordvec=None, squared=True):

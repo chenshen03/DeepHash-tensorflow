@@ -159,7 +159,7 @@ class DVSQ(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = cos_margin_multi_label_loss(self.img_last_layer, self.img_label, self.wordvec, self.output_dim, soft=True)
+        self.cos_loss = cos_margin_multi_label_loss(self.img_last_layer, self.img_label, self.wordvec, self.output_dim, soft=False)
         self.q_loss = self.cq_lambda * pq_loss(self.img_last_layer, self.b_img, self.C, self.wordvec)
         self.loss = self.cos_loss + self.q_loss
 
@@ -222,7 +222,7 @@ class DVSQ(object):
             but all the C need to be replace with C^T :
             self.C = (hu * hu^T + hv * hv^T)^{-1} (hu^T * U + hv^T * V)
         '''
-        print("#DQN train# updating Centers")
+        print("#DVSQ train# updating Centers")
         old_C_value = self.sess.run(self.C)
 
         h = self.img_b_all

@@ -72,7 +72,7 @@ def main(config):
         os.makedirs(config.save_dir)
     sys.stdout = Logger(os.path.join(config.save_dir, 'train.log'))
 
-    pprint(vars(args))
+    pprint(vars(config))
     data_root = os.path.join('../../data', config.dataset)
     config.wordvec_dict = f'{data_root}/wordvec.txt'
     img_tr = f'{data_root}/train.txt'

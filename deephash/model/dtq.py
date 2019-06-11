@@ -27,8 +27,8 @@ class DTQ(object):
         self.output_dim = config.output_dim
         self.n_class = config.label_dim
 
-        self.subspace_num = config.subspace
-        self.subcenter_num = config.subcenter
+        self.n_subspace = config.n_subspace
+        self.n_subcenter = config.n_subcenter
         self.code_batch_size = config.code_batch_size
         self.cq_lambda = config.cq_lambda
         self.max_iter_update_Cb = config.max_iter_update_Cb
@@ -57,8 +57,8 @@ class DTQ(object):
                 self.triplet_margin,
                 self.select_strategy,
                 self.output_dim,
-                self.subspace_num,
-                self.subcenter_num,
+                self.n_subspace,
+                self.n_subcenter,
                 self.dist_type,
                 self.n_part,
                 self.triplet_thresold,
@@ -79,26 +79,26 @@ class DTQ(object):
 
         with tf.name_scope('quantization'):
             self.C = tf.Variable(tf.random_uniform(
-                                    [self.subspace_num * self.subcenter_num, self.output_dim],
+                                    [self.n_subspace * self.n_subcenter, self.output_dim],
                                     minval=-1, maxval=1, dtype=tf.float32, name='centers'))
             self.deep_param_img['C'] = self.C
 
             self.img_output_all = tf.placeholder(tf.float32, [None, self.output_dim]) 
-            self.img_b_all = tf.placeholder(tf.float32, [None, self.subspace_num * self.subcenter_num])
+            self.img_b_all = tf.placeholder(tf.float32, [None, self.n_subspace * self.n_subcenter])
 
-            self.b_img = tf.placeholder(tf.float32, [None, self.subspace_num * self.subcenter_num])
+            self.b_img = tf.placeholder(tf.float32, [None, self.n_subspace * self.n_subcenter])
             self.ICM_m = tf.placeholder(tf.int32, []) # 子空间指示
-            self.ICM_b_m = tf.placeholder(tf.float32, [None, self.subcenter_num]) # X在第ICM_m个子空间的编码
-            self.ICM_b_all = tf.placeholder(tf.float32, [None, self.subcenter_num * self.subspace_num]) # X的完整二值编码
+            self.ICM_b_m = tf.placeholder(tf.float32, [None, self.n_subcenter]) # X在第ICM_m个子空间的编码
+            self.ICM_b_all = tf.placeholder(tf.float32, [None, self.n_subcenter * self.n_subspace]) # X的完整二值编码
             self.ICM_X = tf.placeholder(tf.float32, [self.code_batch_size, self.output_dim]) # 神经网络的输出特征X
-            self.ICM_C_m = tf.slice(self.C, [self.ICM_m * self.subcenter_num, 0], [self.subcenter_num, self.output_dim]) # 第ICM_m个子空间的codebook
+            self.ICM_C_m = tf.slice(self.C, [self.ICM_m * self.n_subcenter, 0], [self.n_subcenter, self.output_dim]) # 第ICM_m个子空间的codebook
             self.ICM_X_residual = self.ICM_X - tf.matmul(self.ICM_b_all, self.C) + tf.matmul(self.ICM_b_m, self.ICM_C_m)
             ICM_X_expand = tf.expand_dims(self.ICM_X_residual, 1)
             ICM_C_m_expand = tf.expand_dims(self.ICM_C_m, 0)
 
             ICM_Loss = tf.reduce_sum(tf.square(ICM_X_expand - ICM_C_m_expand), 2)  # N * M * D -> N * M
             ICM_best_centers = tf.argmin(ICM_Loss, 1)
-            self.ICM_best_centers_one_hot = tf.one_hot(ICM_best_centers, self.subcenter_num, dtype=tf.float32)
+            self.ICM_best_centers_one_hot = tf.one_hot(ICM_best_centers, self.n_subcenter, dtype=tf.float32)
 
         self.global_step = tf.Variable(0, trainable=False)
         self.train_op = self.apply_loss_function(self.global_step)
@@ -218,14 +218,14 @@ class DTQ(object):
                                         (fbgrad*20, self.train_last_layer[1])], global_step=global_step)
 
     def initial_centers(self, img_output):
-        C_init = np.zeros([self.subspace_num * self.subcenter_num, self.output_dim])
+        C_init = np.zeros([self.n_subspace * self.n_subcenter, self.output_dim])
         all_output = img_output
-        for i in range(self.subspace_num):
-            start = i*int(self.output_dim/self.subspace_num)
-            end = (i+1)*int(self.output_dim/self.subspace_num)
+        for i in range(self.n_subspace):
+            start = i*int(self.output_dim/self.n_subspace)
+            end = (i+1)*int(self.output_dim/self.n_subspace)
             to_fit = all_output[:, start:end]
-            kmeans = MiniBatchKMeans(n_clusters=self.subcenter_num).fit(to_fit)
-            C_init[i * self.subcenter_num: (i + 1) * self.subcenter_num, start:end] = kmeans.cluster_centers_
+            kmeans = MiniBatchKMeans(n_clusters=self.n_subcenter).fit(to_fit)
+            C_init[i * self.n_subcenter: (i + 1) * self.n_subcenter, start:end] = kmeans.cluster_centers_
         return C_init
 
     def update_centers(self, img_dataset):
@@ -240,7 +240,7 @@ class DTQ(object):
 
         h = self.img_b_all
         U = self.img_output_all
-        smallResidual = tf.constant(np.eye(self.subcenter_num * self.subspace_num, dtype=np.float32) * 0.001)
+        smallResidual = tf.constant(np.eye(self.n_subcenter * self.n_subspace, dtype=np.float32) * 0.001)
         Uh = tf.matmul(tf.transpose(h), U)
         hh = tf.add(tf.matmul(tf.transpose(h), h), smallResidual)
         compute_centers = tf.matmul(tf.matrix_inverse(hh), Uh)
@@ -271,17 +271,17 @@ class DTQ(object):
         code = np.zeros(code.shape)
 
         for iterate in range(self.max_iter_update_b):
-            sub_list = list(range(self.subspace_num))
+            sub_list = list(range(self.n_subspace))
             random.shuffle(sub_list)
             for m in sub_list:
                 best_centers_one_hot_val = self.sess.run(self.ICM_best_centers_one_hot, feed_dict={
-                    self.ICM_b_m: code[:, m * self.subcenter_num: (m + 1) * self.subcenter_num],
+                    self.ICM_b_m: code[:, m * self.n_subcenter: (m + 1) * self.n_subcenter],
                     self.ICM_b_all: code,
                     self.ICM_m: m,
                     self.ICM_X: output,
                 })
 
-                code[:, m * self.subcenter_num: (m + 1) * self.subcenter_num] = best_centers_one_hot_val
+                code[:, m * self.n_subcenter: (m + 1) * self.n_subcenter] = best_centers_one_hot_val
         return code
 
     def update_codes_batch(self, dataset, batch_size):
@@ -411,7 +411,7 @@ class DTQ(object):
         # Evaluation
         print("%s #validation# calculating MAP@%d" % (datetime.now(), R))
         C_tmp = self.sess.run(self.C)
-        mAPs = MAPs_CQ(C_tmp, self.subspace_num, self.subcenter_num, R)
+        mAPs = MAPs_CQ(C_tmp, self.n_subspace, self.n_subcenter, R)
         self.save_codes(img_database, img_query, C_tmp)
         return {
             'map_feature_ip': mAPs.get_mAPs_by_feature(img_database, img_query),
@@ -423,14 +423,16 @@ class DTQ(object):
 # TODO implement the triplet dataset
 def train(img_dataset, img_query, img_database, config):
     model = DTQ(config)
-    img_dataset = Dataset(img_dataset, config['output_dim'], config['n_subspace'] * config['n_subcenter'])
-    model.train_cq(img_dataset, img_query, img_database, config['R'])
+    img_dataset = Dataset(img_dataset, config.output_dim, config.n_subspace * config.n_subcenter)
+    img_query = Dataset(img_query, config.output_dim, config.n_subspace * config.n_subcenter)
+    img_database = Dataset(img_database, config.output_dim, config.n_subspace * config.n_subcenter)
+    model.train_cq(img_dataset, img_query, img_database, config.R)
     return model.save_dir
 
 
 def validation(img_query, img_database, config):
     model = DTQ(config)
-    img_query = Dataset(img_query, config['output_dim'], config['n_subspace'] * config['n_subcenter'])
-    img_database = Dataset(img_database, config['output_dim'], config['n_subspace'] * config['n_subcenter'])
-    return model.validation(img_query, img_database, config['R'])
+    img_query = Dataset(img_query, config.output_dim, config.n_subspace * config.n_subcenter)
+    img_database = Dataset(img_database, config.output_dim, config.n_subspace * config.n_subcenter)
+    return model.validation(img_query, img_database, config.R)
 

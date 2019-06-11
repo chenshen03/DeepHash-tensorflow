@@ -70,7 +70,7 @@ def main(config):
         os.makedirs(config.save_dir)
     sys.stdout = Logger(os.path.join(config.save_dir, 'train.log'))
 
-    pprint(vars(args))
+    pprint(vars(config))
     data_root = os.path.join('../../data', config.dataset)
     img_tr = f'{data_root}/train.txt'
     img_te = f'{data_root}/test.txt'

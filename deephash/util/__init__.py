@@ -16,6 +16,18 @@ class Logger(object):
         self.terminal.flush()
 
 
+def plot_binary(codes):
+    size, scale = 1000, 10
+    commutes = pd.Series(codes)
+
+    commutes.plot.hist(grid=True, bins=200, rwidth=0.9,
+         color='#607c8e')
+    plt.title('codes distributions')
+    plt.xlabel('code')
+    plt.ylabel('Counts')
+    plt.grid(axis='y', alpha=0.75)
+
+
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True

@@ -11,12 +11,12 @@ import os
 _since_beginning = collections.defaultdict(lambda: {})
 _since_last_flush = collections.defaultdict(lambda: {})
 
-_iter = [0]
+_iter = 0
 def tick():
-	_iter[0] += 1
+	_iter += 1
 
 def plot(name, value):
-	_since_last_flush[name][_iter[0]] = value
+	_since_last_flush[name][_iter] = value
 
 def flush(path = ""):
 	prints = []
@@ -34,7 +34,7 @@ def flush(path = ""):
 		plt.ylabel(name)
 		plt.savefig(os.path.join(path, name.replace(' ', '_')+'.jpg'))
 
-	print("iter {}\t{}".format(_iter[0], "\t".join(prints)))
+	print("iter {}\t{}".format(_iter, "\t".join(prints)))
 	_since_last_flush.clear()
 
 	with open('log.pkl', 'wb') as f:

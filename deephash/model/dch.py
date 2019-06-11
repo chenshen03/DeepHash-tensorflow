@@ -13,10 +13,11 @@ from math import ceil
 import numpy as np
 import tensorflow as tf
 
-import model.plot as plot
+import util.plot as plot
 from architecture import img_alexnet_layers
 from evaluation import MAPs
 from data_provider.pairwise import Dataset
+from loss import *
 
 
 class DCH(object):
@@ -37,7 +38,7 @@ class DCH(object):
                 self.bias,
                 self.gamma,
                 self.dataset)
-        self.save_file = os.path.join(self.save_dir, self.file_name + '.npy')
+        self.model_file = os.path.join(self.save_dir, self.file_name + '.npy')
 
         ### Setup session
         print ("launching session")
@@ -72,7 +73,7 @@ class DCH(object):
 
     def save_model(self, model_file=None):
         if model_file is None:
-            model_file = self.save_file
+            model_file = self.model_file
         model = {}
         for layer in self.deep_param_img:
             model[layer] = self.sess.run(self.deep_param_img[layer])
@@ -83,57 +84,10 @@ class DCH(object):
         np.save(model_file, np.array(model))
         return
 
-    def cauchy_cross_entropy(self, u, label_u, v=None, label_v=None, gamma=1, normed=True):
-
-        if v is None:
-            v = u
-            label_v = label_u
-
-        label_ip = tf.cast(
-            tf.matmul(label_u, tf.transpose(label_v)), tf.float32)
-        s = tf.clip_by_value(label_ip, 0.0, 1.0)
-
-        if normed:
-            ip_1 = tf.matmul(u, tf.transpose(v))
-
-            def reduce_shaper(t):
-                return tf.reshape(tf.reduce_sum(t, 1), [tf.shape(t)[0], 1])
-            mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)), reduce_shaper(
-                tf.square(v)) + tf.constant(0.000001), transpose_b=True))
-            dist = tf.constant(np.float32(self.output_dim)) / 2.0 * \
-                (1.0 - tf.div(ip_1, mod_1) + tf.constant(0.000001))
-        else:
-            r_u = tf.reshape(tf.reduce_sum(u * u, 1), [-1, 1])
-            r_v = tf.reshape(tf.reduce_sum(v * v, 1), [-1, 1])
-
-            dist = r_u - 2 * tf.matmul(u, tf.transpose(v)) + \
-                tf.transpose(r_v) + tf.constant(0.001)
-
-        cauchy = gamma / (dist + gamma)
-
-        s_t = tf.multiply(tf.add(s, tf.constant(-0.5)), tf.constant(2.0))
-        sum_1 = tf.reduce_sum(s)
-        sum_all = tf.reduce_sum(tf.abs(s_t))
-        balance_param = tf.add(
-            tf.abs(tf.add(s, tf.constant(-1.0))), tf.multiply(tf.div(sum_all, sum_1), s))
-
-        mask = tf.equal(tf.eye(tf.shape(u)[0]), tf.constant(0.0))
-
-        cauchy_mask = tf.boolean_mask(cauchy, mask)
-        s_mask = tf.boolean_mask(s, mask)
-        balance_p_mask = tf.boolean_mask(balance_param, mask)
-
-        all_loss = - s_mask * \
-            tf.log(cauchy_mask) - (tf.constant(1.0) - s_mask) * \
-            tf.log(tf.constant(1.0) - cauchy_mask)
-
-        return tf.reduce_mean(tf.multiply(all_loss, balance_p_mask))
-
     def apply_loss_function(self, global_step):
-        ### loss function
-        self.cos_loss = self.cauchy_cross_entropy(self.img_last_layer, self.img_label, gamma=self.gamma, normed=False)
-        self.q_loss_img = tf.reduce_mean(tf.square(tf.subtract(tf.abs(self.img_last_layer), tf.constant(1.0))))
-        self.q_loss = self.q_lambda * self.q_loss_img
+        # loss function
+        self.cos_loss = cauchy_cross_entropy_loss(self.img_last_layer, self.img_label, self.output_dim, gamma=self.gamma, normed=True)
+        self.q_loss = self.q_lambda * quantization_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_loss
 
         ### Last layer has a 10 times learning rate
@@ -252,9 +206,9 @@ class DCH(object):
         return {
             'i2i_by_feature': mAPs.get_mAPs_by_feature(img_database, img_query),
             'i2i_after_sign': mAPs.get_mAPs_after_sign(img_database, img_query),
-            'i2i_prec_radius_2': prec,
-            'i2i_recall_radius_2': rec,
             'i2i_map_radius_2': mmap,
+            'i2i_prec_radius_2': prec,
+            'i2i_recall_radius_2': rec
         }
 
 
