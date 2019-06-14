@@ -164,6 +164,24 @@ def contrastive_loss(u, label_u, margin=4, balanced=False):
     return loss
 
 
+def exp_loss(u, label_u, margin=4):
+    '''exponential loss
+    '''
+    with tf.name_scope('exp_loss'):
+        batch_size = tf.cast(tf.shape(u)[0], tf.float32)
+        S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
+        E = distance(u)
+
+        ## baseline
+        # loss_1 = S * E + (1 - S) * (E - tf.log(tf.exp(E) - 1))
+
+        ## margin hinge-like loss
+        loss_1 = S * E + (1 - S) * tf.maximum(margin - E, 0.0)
+
+        loss = tf.reduce_sum(loss_1) / (batch_size*(batch_size-1))
+    return loss
+
+
 '''triplet loss
 '''
 

@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
+from .tsne import plot_tsne, plot_distribution
 
 
 class Logger(object):
@@ -14,18 +16,6 @@ class Logger(object):
         
     def flush(self):
         self.terminal.flush()
-
-
-def plot_binary(codes):
-    size, scale = 1000, 10
-    commutes = pd.Series(codes)
-
-    commutes.plot.hist(grid=True, bins=200, rwidth=0.9,
-         color='#607c8e')
-    plt.title('codes distributions')
-    plt.xlabel('code')
-    plt.ylabel('Counts')
-    plt.grid(axis='y', alpha=0.75)
 
 
 def str2bool(v):

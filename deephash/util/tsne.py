@@ -1,24 +1,32 @@
-from sklearn import manifold, datasets
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import manifold
 from scipy.spatial import distance
-
 import torch
 import torch.optim as optim
-import torch.nn.functional as F
-import time
+
+
+def plot_distribution(data, path):
+    _, D = data.shape
+    plt.figure(figsize=(32, 32));
+    for i in range(1, 32+1):
+        plt.subplot(D//4, 4, i);
+        commutes = pd.Series(data[:, i-1])
+        commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+        plt.title(f'{i}bit')
+    plt.savefig(f"{path}/data_distribution.png")
+    
+
+def plot_tsne(data, label, path, R=2000):
+    if label.ndim > 1:
+        label = label.argmax(axis=1)
+    plt.figure(figsize=(16, 12));
+    embed = TSNE(n_components=2, perplexity=30, lr=1, eps=1e-9, n_iter=2000, device='cuda').fit_transform(data[:R])
+    plt.scatter(embed[:, 0], embed[:, 1], c=label[:R], s=10)
+    plt.savefig(f"{path}/data_t-SNE.png")
 
 
 class TSNE(object):
-    """ t-SNE visualization
-    
-    example:
-    ``` python
-        digits = datasets.load_digits(n_class=10)
-        embed = TSNE(n_components=2, perplexity=30, lr=1, eps=1e-9, 
-                    n_iter=2000, device='cuda').fit_transform(digits.data)
-        plt.scatter(embed[:, 0], embed[:, 1], c=digits.target, s=10)
-        plt.show();
-    ```
-    """
     
     def __init__(self, n_components=2, perplexity=30, lr=1, eps=1e-9, n_iter=2000, device='cpu'):
         self.perplexity = perplexity
@@ -47,7 +55,6 @@ class TSNE(object):
         optimizer = optim.Adam([y], lr=self.lr)
         criterion = torch.nn.KLDivLoss()
 
-        t = time.time()
         for i_iter in range(self.n_iter):
             q = self.t_distribution(y).reshape(-1)
             loss =  (p * (log_p - torch.log(q))).sum()
