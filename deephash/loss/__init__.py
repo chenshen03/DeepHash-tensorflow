@@ -71,7 +71,7 @@ def cross_entropy_loss(u, label_u, alpha=0.5, normed=True, balanced=True):
         if normed:
             ip_1 = tf.matmul(u, tf.transpose(u))
             mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)),
-                                        reduce_shaper(tf.square(u)), transpose_b=True))
+                                    reduce_shaper(tf.square(u)), transpose_b=True))
             ip = tf.div(ip_1, mod_1)
         else:
             ip = tf.clip_by_value(tf.matmul(u, tf.transpose(u)), -1.5e1, 1.5e1)
@@ -95,28 +95,26 @@ def cross_entropy_loss(u, label_u, alpha=0.5, normed=True, balanced=True):
     return loss
 
 
-def cauchy_cross_entropy_loss(u, label_u, output_dim=300, gamma=1, normed=True):
+def cauchy_cross_entropy_loss(u, label_u, gamma=16, normed=True):
     '''cauchy cross entropy loss
     - Deep Cauchy Hashing for Hamming Space Retrieval
     '''
     with tf.name_scope('cauchy_cross_entropy_loss'):
-        v = u
-        label_v = label_u
+        output_dim = tf.cast(tf.shape(u)[1], tf.float32)
 
         if normed:
-            ip_1 = tf.matmul(u, tf.transpose(v))
+            ip_1 = tf.matmul(u, tf.transpose(u))
             mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)), reduce_shaper(
-                tf.square(v)) + tf.constant(0.000001), transpose_b=True))
-            dist = tf.constant(np.float32(output_dim)) / 2.0 * \
-                (1.0 - tf.div(ip_1, mod_1) + tf.constant(0.000001))
+                tf.square(u)) + tf.constant(1e-6), transpose_b=True))
+            dist = output_dim / 2.0 * (1.0 - tf.div(ip_1, mod_1) + tf.constant(1e-6))
         else:
             r_u = tf.reshape(tf.reduce_sum(u * u, 1), [-1, 1])
-            r_v = tf.reshape(tf.reduce_sum(v * v, 1), [-1, 1])
+            r_v = tf.reshape(tf.reduce_sum(u * u, 1), [-1, 1])
 
-            dist = r_u - 2 * tf.matmul(u, tf.transpose(v)) + \
+            dist = r_u - 2 * tf.matmul(u, tf.transpose(u)) + \
                 tf.transpose(r_v) + tf.constant(0.001)
 
-        S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_v)), 0.0, 1.0)
+        S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
         with tf.name_scope('balance'):
             Sim = tf.multiply(tf.add(S, tf.constant(-0.5)), tf.constant(2.0))
             sum_1 = tf.reduce_sum(S)
@@ -164,21 +162,41 @@ def contrastive_loss(u, label_u, margin=4, balanced=False):
     return loss
 
 
-def exp_loss(u, label_u, margin=4):
+def exp_loss(u, label_u, alpha, balanced=True, dist_type='euclidean2'):
     '''exponential loss
     '''
     with tf.name_scope('exp_loss'):
-        batch_size = tf.cast(tf.shape(u)[0], tf.float32)
+        batch_size = tf.shape(u)[0]
+        output_dim = tf.shape(u)[1]
         S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
-        E = distance(u)
-
-        ## baseline
-        # loss_1 = S * E + (1 - S) * (E - tf.log(tf.exp(E) - 1))
 
         ## margin hinge-like loss
-        loss_1 = S * E + (1 - S) * tf.maximum(margin - E, 0.0)
+        # D = distance(u, dist_type='euclidean2')
+        # E = D
+        # loss_1 = S * E + (1 - S) * tf.maximum(alpha - E, 0.0)
 
-        loss = tf.reduce_sum(loss_1) / (batch_size*(batch_size-1))
+        ## cauchy cross-entropy loss
+        D = distance(u, dist_type='cosine')
+        E = tf.log(1 + alpha*D)
+
+        ## sigmoid
+        # D = distance(u, dist_type='cosine')
+        # E = tf.log(1 + tf.exp(alpha*(2*D-1)))
+
+        mask = tf.equal(tf.eye(batch_size), tf.constant(0.0))
+        E_m = tf.boolean_mask(E, mask)
+        S_m = tf.boolean_mask(S, mask)
+
+        loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
+
+        if balanced:
+            S_all = tf.cast(batch_size * (batch_size - 1), tf.float32)
+            S_1 = tf.reduce_sum(S)
+            balance_param = (S_all / S_1) * S + (1 - S)
+            B_m= tf.boolean_mask(balance_param, mask)
+            loss_1 = B_m * loss_1
+
+        loss = tf.reduce_mean(loss_1)
     return loss
 
 

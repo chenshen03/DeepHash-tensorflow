@@ -38,6 +38,9 @@ def inner_product(x1, x2):
 
 def cosine(x1, x2):
     return (1 + inner_product(normed(x1), normed(x2))) / 2
+ 
+def cos(x1, x2):
+    return 1 - 2 * cosine(x1, x2)
 
 def distance(x1, x2=None, pair=True, dist_type="euclidean2"):
     '''
