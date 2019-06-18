@@ -109,5 +109,3 @@ models/
 data/
 *.log
 *.sh
-
-dhcs*

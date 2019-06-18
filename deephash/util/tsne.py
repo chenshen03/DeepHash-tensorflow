@@ -8,8 +8,8 @@ import torch.optim as optim
 
 def plot_distribution(data, path):
     _, D = data.shape
-    plt.figure(figsize=(32, 32));
-    for i in range(1, 32+1):
+    plt.figure(figsize=(32, D));
+    for i in range(1, D+1):
         plt.subplot(D//4, 4, i);
         commutes = pd.Series(data[:, i-1])
         commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');

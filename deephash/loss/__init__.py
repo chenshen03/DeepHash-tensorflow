@@ -100,13 +100,13 @@ def cauchy_cross_entropy_loss(u, label_u, gamma=16, normed=True):
     - Deep Cauchy Hashing for Hamming Space Retrieval
     '''
     with tf.name_scope('cauchy_cross_entropy_loss'):
-        output_dim = tf.cast(tf.shape(u)[1], tf.float32)
+        bit = tf.cast(tf.shape(u)[1], tf.float32)
 
         if normed:
             ip_1 = tf.matmul(u, tf.transpose(u))
             mod_1 = tf.sqrt(tf.matmul(reduce_shaper(tf.square(u)), reduce_shaper(
                 tf.square(u)) + tf.constant(1e-6), transpose_b=True))
-            dist = output_dim / 2.0 * (1.0 - tf.div(ip_1, mod_1) + tf.constant(1e-6))
+            dist = bit / 2.0 * (1.0 - tf.div(ip_1, mod_1) + tf.constant(1e-6))
         else:
             r_u = tf.reshape(tf.reduce_sum(u * u, 1), [-1, 1])
             r_v = tf.reshape(tf.reduce_sum(u * u, 1), [-1, 1])
@@ -162,32 +162,34 @@ def contrastive_loss(u, label_u, margin=4, balanced=False):
     return loss
 
 
-def exp_loss(u, label_u, alpha, balanced=True, dist_type='euclidean2'):
+def exp_loss(u, label_u, alpha, balanced=True):
     '''exponential loss
     '''
     with tf.name_scope('exp_loss'):
         batch_size = tf.shape(u)[0]
-        output_dim = tf.shape(u)[1]
+        bit = tf.shape(u)[1]
+        mask = tf.equal(tf.eye(batch_size), tf.constant(0.0))
         S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
+        S_m = tf.boolean_mask(S, mask)
 
         ## margin hinge-like loss
-        # D = distance(u, dist_type='euclidean2')
-        # E = D
-        # loss_1 = S * E + (1 - S) * tf.maximum(alpha - E, 0.0)
+        balanced = False
+        D = distance(u, dist_type='euclidean2')
+        E = D
+        E_m = tf.boolean_mask(E, mask)
+        loss_1 = S_m * E_m + (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
 
         ## cauchy cross-entropy loss
-        D = distance(u, dist_type='cosine')
-        E = tf.log(1 + alpha*D)
+        # D = distance(u, dist_type='cosine')
+        # E = tf.log(1 + alpha * D)
+        # E_m = tf.boolean_mask(E, mask)
+        # loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
 
         ## sigmoid
         # D = distance(u, dist_type='cosine')
-        # E = tf.log(1 + tf.exp(alpha*(2*D-1)))
-
-        mask = tf.equal(tf.eye(batch_size), tf.constant(0.0))
-        E_m = tf.boolean_mask(E, mask)
-        S_m = tf.boolean_mask(S, mask)
-
-        loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
+        # E = tf.log(1 + tf.exp(alpha * (2*D-1)))
+        # E_m = tf.boolean_mask(E, mask)
+        # loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
 
         if balanced:
             S_all = tf.cast(batch_size * (batch_size - 1), tf.float32)
@@ -219,7 +221,7 @@ def triplet_loss(anchor, pos, neg, margin, dist_type='euclidean2'):
     return loss
 
 
-def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, margin=0.7):
+def cos_margin_multi_label_loss(u, label_u, wordvec, bit=300, soft=True, margin=0.7):
     '''cosine margin multi label loss
     - Deep Visual-Semantic Quantization for Efficient Image Retrieval
     '''
@@ -228,7 +230,7 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, 
     # label_u: N * L
     # wordvec: L * D
     with tf.name_scope('cos_margin_multi_label_loss'):
-        assert output_dim == 300
+        assert bit == 300
 
         batch_size = tf.cast(tf.shape(label_u)[0], tf.int32)
         n_class = tf.cast(tf.shape(label_u)[1], tf.int32)
@@ -294,11 +296,6 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, output_dim=300, soft=True, 
     return loss
 
 
-'''listwise loss
-- Hashing as Tie-Aware Learning to Rank
-'''
-
-
 '''quantization loss
 '''
 
@@ -314,16 +311,7 @@ def quantization_loss(z, L2=True):
         else:
             # L1 norm, DSH
             loss = tf.reduce_mean(tf.abs(tf.subtract(tf.abs(z), tf.constant(1.0))))
-    return loss
-
-
-def cauchy_quantization_loss(z):
-    '''quantization loss
-    - Deep Cauchy Hashing for Hamming Space Retrieval
-    '''
-    with tf.name_scope('cauchy_quantization_loss'):
-        pass
-    return     
+    return loss 
 
 
 def pq_loss(z, h, C, wordvec=None, squared=True):
@@ -345,14 +333,7 @@ def pq_loss(z, h, C, wordvec=None, squared=True):
     return loss
 
 
-'''classification loss
-- Deep Semantic Hashing with Generative Adversarial Networks
-- Deep Supervised Discrete Hashing
-- Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
-'''
-
-
-'''independence and balance loss
+'''balance and orthogonal loss
 - Deep semantic ranking based hashing for multi-label image retrieval
 - Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
 '''
@@ -364,6 +345,33 @@ def balance_loss(u):
     - Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
     '''
     with tf.name_scope('balance_loss'):
-        H_mean = tf.reduce_mean(tf.sign(u), axis=1)
+        H = tf.sign(u)
+        H_mean = tf.reduce_mean(H, axis=0)
         loss = tf.reduce_mean(tf.square(H_mean))
     return loss
+
+
+def orthogonal_loss(u):
+    '''orthogonal_loss
+    - Deep Triplet Quantization
+    '''
+    with tf.name_scope('orthogonal_loss'):
+        batch_size = tf.shape(u)[0]
+        bit = tf.shape(u)[1]
+        H = tf.sign(u)
+        I = tf.eye(bit)
+        loss = tf.reduce_mean(tf.square(tf.matmul(
+            H, H, transpose_a=True) / tf.cast(batch_size, tf.float32) - I))
+    return loss
+
+
+'''listwise loss
+- Hashing as Tie-Aware Learning to Rank
+'''
+
+
+'''classification loss
+- Deep Semantic Hashing with Generative Adversarial Networks
+- Deep Supervised Discrete Hashing
+- Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
+'''
