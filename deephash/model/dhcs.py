@@ -121,7 +121,7 @@ class DHCS(object):
     def apply_loss_function(self, global_step):
         # loss function
         self.cos_loss = exp_loss(self.img_last_layer, self.img_label, self.alpha, self.wordvec)
-        self.q_loss = quantization_loss(self.img_last_layer)
+        self.q_loss = quantization_loss(self.img_last_layer, q_type='cauchy')
         self.b_loss = balance_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_lambda * self.q_loss +  self.b_lambda * self.b_loss
 
@@ -234,7 +234,7 @@ class DHCS(object):
 
         print("visualizing data ...")
         plot_distribution(img_database.output, self.save_dir)
-        plot_distance(img_database.output, self.save_dir)
+        plot_distance(img_query.output, self.save_dir)
         plot_tsne(sign(img_database.output), img_database.label, self.save_dir)
 
         return {

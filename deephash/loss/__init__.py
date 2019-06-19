@@ -305,29 +305,31 @@ def cos_margin_multi_label_loss(u, label_u, wordvec, bit=300, soft=True, margin=
 '''quantization loss
 '''
 
-def quantization_loss(z, L2=True):
+def quantization_loss(u, q_type='L2'):
     '''quantization loss
     - Deep Hashing Network for Efficient Similarity Retrieval
     - Deep Supervised Hashing for Fast Image Retrieval
+    - Deep Cauchy Hashing for Hamming Space Retrieval
     '''
     with tf.name_scope('quantization_loss'):
-        if L2:
-            # L2^2 norm, DHN
-            loss = tf.reduce_mean(tf.square(tf.subtract(tf.abs(z), tf.constant(1.0))))
-        else:
-            # L1 norm, DSH
-            loss = tf.reduce_mean(tf.abs(tf.subtract(tf.abs(z), tf.constant(1.0))))
-    return loss 
+        if q_type == 'L2':
+            loss = tf.reduce_mean(tf.square(tf.abs(u) - tf.constant(1.0)))
+        elif q_type == 'L1':
+            loss = tf.reduce_mean(tf.abs(tf.abs(u) - tf.constant(1.0)))
+        elif q_type == 'cauchy':
+            epsilon = 0.58
+            loss = tf.reduce_mean(tf.log(1 + tf.abs((tf.abs(u) - tf.constant(1.0))) / epsilon))
+    return loss
 
 
-def pq_loss(z, h, C, wordvec=None, squared=True):
+def pq_loss(u, h, C, wordvec=None, squared=True):
     '''product quantization loss
     - Deep Quantization Network for Efficient Image Retrieval
     - Deep Visual-Semantic Quantization for Efficient Image Retrieval
     - Deep Triplet Quantization
     '''
     with tf.name_scope('pq_loss'):
-        dist = z - tf.matmul(h, C)
+        dist = u - tf.matmul(h, C)
 
         if wordvec != None:
             dist = tf.matmul(dist, wordvec, transpose_b=True)
