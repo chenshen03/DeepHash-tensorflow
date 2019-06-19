@@ -17,7 +17,7 @@ from architecture import img_alexnet_layers
 from evaluation import MAPs
 from loss import *
 from data_provider.pairwise import Dataset
-from util import sign, plot_distribution, plot_tsne
+from util import sign, plot_distribution, plot_distance, plot_tsne
 
 
 class DHCS(object):
@@ -32,6 +32,7 @@ class DHCS(object):
         self.q_lambda = config.q_lambda
         self.b_lambda = config.b_lambda
         self.alpha = config.alpha
+        self.wordvec_dict = config.wordvec_dict
 
         self.batch_size = config.batch_size
         self.val_batch_size = config.val_batch_size
@@ -40,7 +41,6 @@ class DHCS(object):
         self.learning_rate = config.lr
         self.learning_rate_decay_factor = config.learning_rate_decay_factor
         self.decay_step = config.decay_step
-
         self.finetune_all = config.finetune_all
 
         self.save_dir = config.save_dir
@@ -60,6 +60,7 @@ class DHCS(object):
         with tf.device(self.device):
             self.img = tf.placeholder(tf.float32, [None, 256, 256, 3])
             self.img_label = tf.placeholder(tf.float32, [None, self.n_class])
+            self.wordvec = tf.constant(np.loadtxt(self.wordvec_dict), dtype=tf.float32)
 
             self.network_weights = config.network_weights
             self.img_last_layer, self.deep_param_img, self.train_layers, self.train_last_layer = self.load_model()
@@ -119,7 +120,7 @@ class DHCS(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = exp_loss(self.img_last_layer, self.img_label, self.alpha)
+        self.cos_loss = exp_loss(self.img_last_layer, self.img_label, self.alpha, self.wordvec)
         self.q_loss = quantization_loss(self.img_last_layer)
         self.b_loss = balance_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_lambda * self.q_loss +  self.b_lambda * self.b_loss
@@ -233,6 +234,7 @@ class DHCS(object):
 
         print("visualizing data ...")
         plot_distribution(img_database.output, self.save_dir)
+        plot_distance(img_database.output, self.save_dir)
         plot_tsne(sign(img_database.output), img_database.label, self.save_dir)
 
         return {

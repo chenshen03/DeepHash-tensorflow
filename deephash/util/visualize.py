@@ -1,9 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn import manifold
-from scipy.spatial import distance
 import torch
 import torch.optim as optim
+from scipy.spatial import distance
+from sklearn import manifold
 
 
 def plot_distribution(data, path):
@@ -16,6 +16,21 @@ def plot_distribution(data, path):
         plt.title(f'{i}bit')
     plt.savefig(f"{path}/data_distribution.png")
     
+
+def plot_distance(data, path):
+    cosine = distance.cdist(data, data, metric='cosine') / 2
+    euclidean = distance.cdist(data, data, metric='euclidean')
+    plt.figure(figsize=(16, 6));
+    plt.subplot(121)
+    plt.title('cosine distribution')
+    commutes = pd.Series(cosine.flatten())
+    commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+    plt.subplot(122)
+    plt.title('euclidean distribution')
+    commutes = pd.Series(euclidean.flatten())
+    commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+    plt.savefig(f"{path}/distance_distribution.png")
+
 
 def plot_tsne(data, label, path, R=2000):
     if label.ndim > 1:

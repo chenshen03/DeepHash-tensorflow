@@ -162,7 +162,7 @@ def contrastive_loss(u, label_u, margin=4, balanced=False):
     return loss
 
 
-def exp_loss(u, label_u, alpha, balanced=True):
+def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
     '''exponential loss
     '''
     with tf.name_scope('exp_loss'):
@@ -172,24 +172,30 @@ def exp_loss(u, label_u, alpha, balanced=True):
         S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
         S_m = tf.boolean_mask(S, mask)
 
+        ## word vector
+        # wordvec_u = tf.matmul(label_u, wordvec)
+        # W = distance(wordvec_u, dist_type='cosine')
+        
         ## margin hinge-like loss
-        balanced = False
-        D = distance(u, dist_type='euclidean2')
-        E = D
-        E_m = tf.boolean_mask(E, mask)
-        loss_1 = S_m * E_m + (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
+        # balanced = False
+        # D = distance(u, dist_type='euclidean2')
+        # E = D
+        # E_m = tf.boolean_mask(E, mask)
+        # loss_1 = S_m * E_m + (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
+        # loss_1 = S_m * E_m
+        # loss_1 = (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
 
-        ## cauchy cross-entropy loss
+        # cauchy cross-entropy loss
         # D = distance(u, dist_type='cosine')
         # E = tf.log(1 + alpha * D)
         # E_m = tf.boolean_mask(E, mask)
         # loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
 
         ## sigmoid
-        # D = distance(u, dist_type='cosine')
-        # E = tf.log(1 + tf.exp(alpha * (2*D-1)))
-        # E_m = tf.boolean_mask(E, mask)
-        # loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
+        D = distance(u, dist_type='cosine')
+        E = tf.log(1 + tf.exp(-alpha * (1-2*D)))
+        E_m = tf.boolean_mask(E, mask)
+        loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
 
         if balanced:
             S_all = tf.cast(batch_size * (batch_size - 1), tf.float32)

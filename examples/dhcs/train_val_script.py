@@ -22,7 +22,7 @@ def parse_args(argv):
     algorithm_group = parser.add_argument_group(title='Algorithm config')
     algorithm_group.add_argument('--bit', type=int, default=32)
     algorithm_group.add_argument('--q-lambda', type=float, default=0.01)
-    algorithm_group.add_argument('--b-lambda', type=float, default=0.01)
+    algorithm_group.add_argument('--b-lambda', type=float, default=0.0)
     algorithm_group.add_argument('--alpha', type=float, default=10)
     # network config
     network_group = parser.add_argument_group(title='Network config')
@@ -46,7 +46,7 @@ def parse_args(argv):
     config, rest = parser.parse_known_args()
     _dataset = config.dataset
     _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.bit}bit_exp/' + \
-        f'{config.prefix}_q{config.q_lambda}_b{config.b_lambda}_a{config.alpha}'
+        f'{config.prefix}_lr{config.lr}_a{config.alpha}_q{config.q_lambda}_b{config.b_lambda}'
     dataset_group.add_argument('--R', type=int, default=Rs[_dataset])
     dataset_group.add_argument('--label-dim', type=str, default=label_dims[_dataset])
     dataset_group.add_argument('--save-dir', type=str, default=_save_dir)
@@ -66,6 +66,7 @@ def main(config):
 
     pprint(vars(config))
     data_root = os.path.join('../../data', config.dataset)
+    config.wordvec_dict = f'{data_root}/wordvec.txt'
     img_tr = f'{data_root}/train.txt'
     img_te = f'{data_root}/test.txt'
     img_db = f'{data_root}/database.txt'
