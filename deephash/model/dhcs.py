@@ -14,10 +14,10 @@ import numpy as np
 import tensorflow as tf
 
 from architecture import img_alexnet_layers
+from data_provider.pairwise import Dataset
 from evaluation import MAPs
 from loss import *
-from data_provider.pairwise import Dataset
-from util import sign, plot_distribution, plot_distance, plot_tsne
+from util import *
 
 
 class DHCS(object):
@@ -39,7 +39,7 @@ class DHCS(object):
         self.max_iter = config.max_iter
         self.network = config.network
         self.learning_rate = config.lr
-        self.learning_rate_decay_factor = config.learning_rate_decay_factor
+        self.lr_decay_factor = config.lr_decay_factor
         self.decay_step = config.decay_step
         self.finetune_all = config.finetune_all
 
@@ -103,7 +103,7 @@ class DHCS(object):
         import collections
         mDataset = collections.namedtuple('Dataset', ['output', 'label'])  
         database = mDataset(codes['db_features'], codes['db_label'])
-        query = mDataset(codes['query_features'], codes['queary_label'])
+        query = mDataset(codes['query_features'], codes['query_label'])
         return database, query
 
     def save_codes(self, database, query, codes_file=None):
@@ -113,7 +113,7 @@ class DHCS(object):
             'db_features': database.output,
             'db_label': database.label,
             'query_features': query.output,
-            'queary_label': query.label,
+            'query_label': query.label,
         }
         print("saving codes to %s" % codes_file)
         np.save(codes_file, np.array(codes))
@@ -127,7 +127,7 @@ class DHCS(object):
 
         # Last layer has a 10 times learning rate
         lr = tf.train.exponential_decay(
-            self.learning_rate, global_step, self.decay_step, self.learning_rate_decay_factor, staircase=True)
+            self.learning_rate, global_step, self.decay_step, self.lr_decay_factor, staircase=True)
         opt = tf.train.MomentumOptimizer(learning_rate=lr, momentum=0.9)
         grads_and_vars = opt.compute_gradients(
             self.loss, self.train_layers + self.train_last_layer)
@@ -233,9 +233,11 @@ class DHCS(object):
         prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, 2)
 
         print("visualizing data ...")
-        plot_distribution(img_database.output, self.save_dir)
-        plot_distance(img_query.output, self.save_dir)
         plot_tsne(sign(img_database.output), img_database.label, self.save_dir)
+        plot_distance(img_database.output, img_database.label, img_query.output, img_query.label, self.save_dir)
+        ratios = plot_distribution(img_database.output, self.save_dir)
+        print(ratios)
+
 
         return {
             'i2i_by_feature': mAPs.get_mAPs_by_feature(img_database, img_query),

@@ -99,7 +99,7 @@ class DHN(object):
         import collections
         mDataset = collections.namedtuple('Dataset', ['output', 'label'])  
         database = mDataset(codes['db_features'], codes['db_label'])
-        query = mDataset(codes['query_features'], codes['queary_label'])
+        query = mDataset(codes['query_features'], codes['query_label'])
         return database, query
 
     def save_codes(self, database, query, codes_file=None):
@@ -109,7 +109,7 @@ class DHN(object):
             'db_features': database.output,
             'db_label': database.label,
             'query_features': query.output,
-            'queary_label': query.label,
+            'query_label': query.label,
         }
         print("saving codes to %s" % codes_file)
         np.save(codes_file, np.array(codes))

@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.optim as optim
 from scipy.spatial import distance
@@ -7,7 +8,7 @@ from sklearn import manifold
 
 
 def plot_distribution(data, path):
-    _, D = data.shape
+    N, D = data.shape
     plt.figure(figsize=(32, D));
     for i in range(1, D+1):
         plt.subplot(D//4, 4, i);
@@ -15,20 +16,35 @@ def plot_distribution(data, path):
         commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
         plt.title(f'{i}bit')
     plt.savefig(f"{path}/data_distribution.png")
+
+    res = ''
+    for i in range(1, 11):
+        t = i / 10
+        ratio = (np.sum(data.flatten()>=t) + np.sum(data.flatten()<=-t)) / (N * D)
+        res += f'threshold: {t:.1f}, quantizaion ratio: {ratio:.5f}\n'
+    return res
     
 
-def plot_distance(data, path):
-    cosine = distance.cdist(data, data, metric='cosine') / 2
-    euclidean = distance.cdist(data, data, metric='euclidean')
-    plt.figure(figsize=(16, 6));
+def plot_distance(db_feats, db_label, query_feats, query_label, path):
+    S = np.matmul(db_label, query_label.transpose())
+    N = np.sum(S)
+
+    plt.figure(figsize=[16, 6])
+
     plt.subplot(121)
-    plt.title('cosine distribution')
-    commutes = pd.Series(cosine.flatten())
+    cosine_32bit = distance.cdist(db_feats, query_feats, metric='cosine')
+    plt.title('cosine distribution on 32bit')
+    commutes = pd.Series(np.hstack((np.random.choice(cosine_32bit[S==1].flatten(), N), \
+                                    np.random.choice(cosine_32bit[S==0].flatten(), N))))
     commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+
     plt.subplot(122)
-    plt.title('euclidean distribution')
-    commutes = pd.Series(euclidean.flatten())
+    euclidean_32bit = distance.cdist(db_feats, query_feats, metric='euclidean')
+    plt.title('euclidean distribution on 32bit')
+    commutes = pd.Series(np.hstack((np.random.choice(euclidean_32bit[S==1].flatten(), N), \
+                                    np.random.choice(euclidean_32bit[S==0].flatten(), N))))
     commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+    
     plt.savefig(f"{path}/distance_distribution.png")
 
 
