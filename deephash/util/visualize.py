@@ -27,7 +27,7 @@ def plot_distribution(data, path):
 
 def plot_distance(db_feats, db_label, query_feats, query_label, path):
     S = np.matmul(db_label, query_label.transpose())
-    N = np.sum(S)
+    N = np.sum(S==1)
 
     plt.figure(figsize=[16, 6])
 
@@ -49,11 +49,15 @@ def plot_distance(db_feats, db_label, query_feats, query_label, path):
 
 
 def plot_tsne(data, label, path, R=2000):
+    label2name = np.array(['airplane', 'automobile', 'bird', 'cat', 'deer', \
+                           'dog', 'frog', 'horse', 'ship', 'truck'])
+    label2color = np.array([(1,0,0), (0,1,0), (0,0,1), (1,0,1), (1,1,0), \
+                            (0,1,1), (1,0.5,0), (0,0,0), (0.75,0.75,0.75), (0.25,0.5,0.5)])
     if label.ndim > 1:
         label = label.argmax(axis=1)
     plt.figure(figsize=(16, 12));
     embed = TSNE(n_components=2, perplexity=30, lr=1, eps=1e-9, n_iter=2000, device='cuda').fit_transform(data[:R])
-    plt.scatter(embed[:, 0], embed[:, 1], c=label[:R], s=10)
+    plt.scatter(embed[:, 0], embed[:, 1], c=label2color[label[:R]], s=10)
     plt.savefig(f"{path}/data_t-SNE.png")
 
 

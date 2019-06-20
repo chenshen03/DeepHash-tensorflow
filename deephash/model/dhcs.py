@@ -121,7 +121,7 @@ class DHCS(object):
     def apply_loss_function(self, global_step):
         # loss function
         self.cos_loss = exp_loss(self.img_last_layer, self.img_label, self.alpha, self.wordvec)
-        self.q_loss = quantization_loss(self.img_last_layer, q_type='cauchy')
+        self.q_loss = quantization_loss(self.img_last_layer, q_type='L2')
         self.b_loss = balance_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_lambda * self.q_loss +  self.b_lambda * self.b_loss
 
@@ -197,7 +197,7 @@ class DHCS(object):
 
         self.sess.close()
 
-    def validation(self, img_query, img_database, R=100):
+    def validation(self, img_database, img_query, R=100):
         if os.path.exists(self.codes_file):
             print("loading ", self.codes_file)
             img_database, img_query = self.load_codes(self.codes_file)
@@ -227,10 +227,7 @@ class DHCS(object):
             # save features and codes
             self.save_codes(img_database, img_query)
 
-        mAPs = MAPs(R)
-
         self.sess.close()
-        prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, 2)
 
         print("visualizing data ...")
         plot_tsne(sign(img_database.output), img_database.label, self.save_dir)
@@ -238,7 +235,9 @@ class DHCS(object):
         ratios = plot_distribution(img_database.output, self.save_dir)
         print(ratios)
 
-
+        print("calculating metrics ...")
+        mAPs = MAPs(R)
+        prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, 2)
         return {
             'i2i_by_feature': mAPs.get_mAPs_by_feature(img_database, img_query),
             'i2i_after_sign': mAPs.get_mAPs_after_sign(img_database, img_query),
@@ -259,4 +258,4 @@ def validation(database_img, query_img, config):
     model = DHCS(config)
     img_database = Dataset(database_img, config.bit)
     img_query = Dataset(query_img, config.bit)
-    return model.validation(img_query, img_database, config.R)
+    return model.validation(img_database, img_query, config.R)

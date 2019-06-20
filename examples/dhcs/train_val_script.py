@@ -27,7 +27,7 @@ def parse_args(argv):
     # network config
     network_group = parser.add_argument_group(title='Network config')
     network_group.add_argument('--gpus', type=str, default='0')
-    network_group.add_argument('--max-iter', type=int, default=5000)
+    network_group.add_argument('--max-iter', type=int, default=10000)
     network_group.add_argument('--batch-size', type=int, default=128)
     network_group.add_argument('--val-batch-size', type=int, default=100)
     network_group.add_argument('--lr', type=float, default=0.005)

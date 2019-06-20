@@ -201,6 +201,7 @@ def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
             S_all = tf.cast(batch_size * (batch_size - 1), tf.float32)
             S_1 = tf.reduce_sum(S)
             balance_param = (S_all / S_1) * S + (1 - S)
+            # balance_param = 10 * S + (1 - S)
             B_m= tf.boolean_mask(balance_param, mask)
             loss_1 = B_m * loss_1
 
