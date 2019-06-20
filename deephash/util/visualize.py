@@ -30,22 +30,30 @@ def plot_distance(db_feats, db_label, query_feats, query_label, path):
     N = np.sum(S==1)
 
     plt.figure(figsize=[16, 6])
-
     plt.subplot(121)
-    cosine_32bit = distance.cdist(db_feats, query_feats, metric='cosine')
-    plt.title('cosine distribution on 32bit')
+    cosine_32bit = distance.cdist(db_feats, query_feats, metric='cosine') / 2
+    plt.title('cosine distribution')
     commutes = pd.Series(np.hstack((np.random.choice(cosine_32bit[S==1].flatten(), N), \
                                     np.random.choice(cosine_32bit[S==0].flatten(), N))))
     commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
-
     plt.subplot(122)
     euclidean_32bit = distance.cdist(db_feats, query_feats, metric='euclidean')
-    plt.title('euclidean distribution on 32bit')
+    plt.title('euclidean distribution')
     commutes = pd.Series(np.hstack((np.random.choice(euclidean_32bit[S==1].flatten(), N), \
                                     np.random.choice(euclidean_32bit[S==0].flatten(), N))))
     commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
-    
     plt.savefig(f"{path}/distance_distribution.png")
+
+    plt.figure(figsize=[16, 6])
+    plt.subplot(121)
+    plt.title('cosine similar distribution')
+    commutes = pd.Series(cosine_32bit[S==1].flatten())
+    commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+    plt.subplot(122)
+    plt.title('cosine dissimilar distribution')
+    commutes = pd.Series(cosine_32bit[S==0].flatten())
+    commutes.plot.hist(grid=True, bins=200, rwidth=0.9, color='#607c8e');
+    plt.savefig(f"{path}/similarity_distribution.png")
 
 
 def plot_tsne(data, label, path, R=2000):

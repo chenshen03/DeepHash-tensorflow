@@ -182,8 +182,6 @@ def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
         # E = D
         # E_m = tf.boolean_mask(E, mask)
         # loss_1 = S_m * E_m + (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
-        # loss_1 = S_m * E_m
-        # loss_1 = (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
 
         # cauchy cross-entropy loss
         # D = distance(u, dist_type='cosine')
@@ -197,11 +195,30 @@ def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
         E_m = tf.boolean_mask(E, mask)
         loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
 
+        ## hyper sigmoid
+        # balanced = False
+        # alpha = 8
+        # belta = 10
+        # gamma = 2
+        # D = gamma * distance(u, dist_type='cosine')
+        # E = tf.log(1 + tf.exp(-alpha * (1-2*D)))
+        # E_m = tf.boolean_mask(E, mask)
+        # loss_1 = belta * S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
+
+        ## post-tune
+        # balanced = False
+        # D = distance(u, dist_type='cosine')
+        # E = D
+        # E_m = tf.boolean_mask(E, mask)
+        # margin = 0.05
+        # loss_1 = S_m * tf.maximum(E_m - alpha + margin, 0.0) + (1 - S_m) *  tf.maximum(alpha + margin - E_m, 0.0)
+        # loss_1 = S_m * tf.maximum(E_m - alpha + margin, 0.0)
+        # loss_1 = (1 - S_m) *  tf.maximum(alpha + margin - E_m, 0.0)
+
         if balanced:
             S_all = tf.cast(batch_size * (batch_size - 1), tf.float32)
             S_1 = tf.reduce_sum(S)
             balance_param = (S_all / S_1) * S + (1 - S)
-            # balance_param = 10 * S + (1 - S)
             B_m= tf.boolean_mask(balance_param, mask)
             loss_1 = B_m * loss_1
 

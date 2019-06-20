@@ -11,6 +11,7 @@ def img_alexnet_layers(img, batch_size, output_dim, stage, model_weights=None, w
     if model_weights is None:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         model_weights = os.path.join(dir_path, "pretrained_model/reference_pretrain.npy")
+        # model_weights = os.path.join(dir_path, "pretrained_model/network_weights.npy")
     
     print("loading img model from ", model_weights)
     net_data = dict(np.load(model_weights, encoding='bytes').item())
