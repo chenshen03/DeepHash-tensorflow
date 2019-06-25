@@ -86,7 +86,7 @@ class DCH(object):
 
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = cauchy_cross_entropy_loss(self.img_last_layer, self.img_label, self.output_dim, gamma=self.gamma, normed=True)
+        self.cos_loss = cauchy_cross_entropy_loss(self.img_last_layer, self.img_label, gamma=self.gamma, normed=True)
         self.q_loss = self.q_lambda * quantization_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_loss
 
@@ -189,18 +189,18 @@ class DCH(object):
 
         self.sess.close()
         prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius_All(img_database, img_query)
-        for i in range(self.output_dim+1):
-            #prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, i)
-            plot.plot('prec', prec[i])
-            plot.plot('rec', rec[i])
-            plot.plot('mAP', mmap[i])
-            plot.tick()
-            print('Results ham dist [%d], prec:%s, rec:%s, mAP:%s'%(i, prec[i], rec[i], mmap[i]))
+        # for i in range(self.output_dim+1):
+        #     #prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, i)
+        #     plot.plot('prec', prec[i])
+        #     plot.plot('rec', rec[i])
+        #     plot.plot('mAP', mmap[i])
+        #     plot.tick()
+        #     print('Results ham dist [%d], prec:%s, rec:%s, mAP:%s'%(i, prec[i], rec[i], mmap[i]))
 
         result_save_dir = os.path.join(self.save_dir, self.file_name)
         if os.path.exists(result_save_dir) is False:
             os.makedirs(result_save_dir)
-        plot.flush(result_save_dir)
+        # plot.flush(result_save_dir)
 
         prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, 2)
         return {

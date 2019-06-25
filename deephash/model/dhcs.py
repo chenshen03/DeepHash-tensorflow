@@ -13,11 +13,11 @@ from math import ceil
 import numpy as np
 import tensorflow as tf
 
-from architecture import img_alexnet_layers
-from data_provider.pairwise import Dataset
-from evaluation import MAPs
+from architecture import *
 from loss import *
 from util import *
+from data_provider.pairwise import Dataset
+from evaluation import MAPs
 
 
 class DHCS(object):
@@ -60,10 +60,14 @@ class DHCS(object):
         with tf.device(self.device):
             self.img = tf.placeholder(tf.float32, [None, 256, 256, 3])
             self.img_label = tf.placeholder(tf.float32, [None, self.n_class])
-            self.wordvec = tf.constant(np.loadtxt(self.wordvec_dict), dtype=tf.float32)
+            try:
+                self.wordvec = tf.constant(np.loadtxt(self.wordvec_dict), dtype=tf.float32)
+            except:
+                print(f'{self.wordvec_dict} does not exist!')
+                self.wordvec = None
 
             self.network_weights = config.network_weights
-            self.img_last_layer, self.deep_param_img, self.train_layers, self.train_last_layer = self.load_model()
+            self.img_last_layer, self.deep_param_img, self.train_layers = self.load_model()
 
             self.global_step = tf.Variable(0, trainable=False)
             self.train_op = self.apply_loss_function(self.global_step)
@@ -74,11 +78,12 @@ class DHCS(object):
                 self.sess = tf_debug.LocalCLIDebugWrapperSession(self.sess)
 
     def load_model(self):
-        if self.network == 'alexnet':
-            img_output = img_alexnet_layers(
-                self.img, self.batch_size, self.bit,
-                self.stage, self.network_weights, val_batch_size=self.val_batch_size)
-        else:
+        networks = {'alexnet': img_alexnet_layers, 'vgg16': img_vgg16_layers}
+        try:
+            img_output = networks[self.network](
+                    self.img, self.batch_size, self.bit,
+                    self.stage, self.network_weights, self.val_batch_size)
+        except:
             raise Exception('cannot use such CNN model as ' + self.network)
         return img_output
 
@@ -125,45 +130,31 @@ class DHCS(object):
         self.b_loss = balance_loss(self.img_last_layer)
         self.loss = self.cos_loss + self.q_lambda * self.q_loss +  self.b_lambda * self.b_loss
 
-        # Last layer has a 10 times learning rate
-        lr = tf.train.exponential_decay(
-            self.learning_rate, global_step, self.decay_step, self.lr_decay_factor, staircase=True)
-        opt = tf.train.MomentumOptimizer(learning_rate=lr, momentum=0.9)
-        grads_and_vars = opt.compute_gradients(
-            self.loss, self.train_layers + self.train_last_layer)
-        fcgrad, _ = grads_and_vars[-2]
-        fbgrad, _ = grads_and_vars[-1]
-
         # for debug
-        self.grads_and_vars = grads_and_vars
-        tf.summary.scalar('lr', lr)
         tf.summary.scalar('loss', self.loss)
         tf.summary.scalar('similar_loss', self.cos_loss)
         tf.summary.scalar('quantization_loss', self.q_loss)
         tf.summary.scalar('balance_loss', self.b_loss)
         self.merged = tf.summary.merge_all()
 
+        # Last layer has a 10 times learning rate
+        lr = tf.train.exponential_decay(
+            self.learning_rate, global_step, self.decay_step, self.lr_decay_factor, staircase=True)
+        opt = tf.train.MomentumOptimizer(learning_rate=lr, momentum=0.9)
+        grads_and_vars = opt.compute_gradients(self.loss, self.train_layers)
+
+        capped_grads_and_vars = []
         if self.finetune_all:
-            return opt.apply_gradients([(grads_and_vars[0][0], self.train_layers[0]),
-                                                         (grads_and_vars[1][0]*2, self.train_layers[1]),
-                                                         (grads_and_vars[2][0], self.train_layers[2]),
-                                                         (grads_and_vars[3][0]*2, self.train_layers[3]),
-                                                         (grads_and_vars[4][0], self.train_layers[4]),
-                                                         (grads_and_vars[5][0]*2, self.train_layers[5]),
-                                                         (grads_and_vars[6][0], self.train_layers[6]),
-                                                         (grads_and_vars[7][0]*2, self.train_layers[7]),
-                                                         (grads_and_vars[8][0], self.train_layers[8]),
-                                                         (grads_and_vars[9][0]*2, self.train_layers[9]),
-                                                         (grads_and_vars[10][0], self.train_layers[10]),
-                                                         (grads_and_vars[11][0]*2, self.train_layers[11]),
-                                                         (grads_and_vars[12][0], self.train_layers[12]),
-                                                         (grads_and_vars[13][0]*2, self.train_layers[13]),
-                                                         (fcgrad*10, self.train_last_layer[0]),
-                                                         (fbgrad*20, self.train_last_layer[1])],
-                                                        global_step=global_step)
-        else:
-            return opt.apply_gradients([(fcgrad*10, self.train_last_layer[0]),
-                                        (fbgrad*20, self.train_last_layer[1])], global_step=global_step)
+            for i, grad in enumerate(grads_and_vars[:-2]):
+                if i % 2 == 0:
+                    capped_grads_and_vars.append((grad[0], grad[1]))
+                else:
+                    capped_grads_and_vars.append((grad[0]*2, grad[1]))
+        capped_grads_and_vars.append((grads_and_vars[-2][0]*10, grads_and_vars[-2][1]))
+        capped_grads_and_vars.append((grads_and_vars[-1][0]*20, grads_and_vars[-1][1]))
+
+        return opt.apply_gradients(capped_grads_and_vars,  global_step=global_step)
+
 
     def train(self, img_dataset):
         print("%s #train# start training" % datetime.now())

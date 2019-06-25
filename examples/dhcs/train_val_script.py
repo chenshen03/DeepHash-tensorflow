@@ -42,11 +42,12 @@ def parse_args(argv):
     dataset_group = parser.add_argument_group(title='Dataset config')
     dataset_group.add_argument('--dataset', type=str, default='cifar10')
     dataset_group.add_argument('--prefix', type=str, default='1')
+    dataset_group.add_argument('--suffix', type=str, default='exp')
     # config process
     config, rest = parser.parse_known_args()
     _dataset = config.dataset
-    _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.bit}bit_exp/' + \
-        f'{config.prefix}_lr{config.lr}_a{config.alpha}_q{config.q_lambda}_b{config.b_lambda}'
+    _save_dir = f'../snapshot/{config.dataset}_{config.network}_{config.bit}bit_{config.suffix}/' + \
+                f'{config.prefix}_q{config.q_lambda}'
     dataset_group.add_argument('--R', type=int, default=Rs[_dataset])
     dataset_group.add_argument('--label-dim', type=str, default=label_dims[_dataset])
     dataset_group.add_argument('--save-dir', type=str, default=_save_dir)
