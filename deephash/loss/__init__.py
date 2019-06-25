@@ -172,9 +172,10 @@ def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
         S = tf.clip_by_value(tf.matmul(label_u, tf.transpose(label_u)), 0.0, 1.0)
         S_m = tf.boolean_mask(S, mask)
 
-        ## word vector
-        # wordvec_u = tf.matmul(label_u, wordvec)
-        # W = distance(wordvec_u, dist_type='cosine')
+        # word vector
+        if wordvec != None:
+            wordvec_u = tf.matmul(label_u, wordvec)
+            W = distance(wordvec_u, dist_type='cosine')
         
         ## margin hinge-like loss
         # balanced = False
@@ -183,6 +184,13 @@ def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
         # E_m = tf.boolean_mask(E, mask)
         # loss_1 = S_m * E_m + (1 - S_m) *  tf.maximum(alpha - E_m, 0.0)
 
+        ## double margin hinge-like loss
+        # balanced = False
+        # D = distance(u, dist_type='cosine')
+        # E = D
+        # E_m = tf.boolean_mask(E, mask)
+        # loss_1 = S_m * tf.maximum(E_m - 0.3, 0.0) + (1 - S_m) *  tf.maximum(0.45 - E_m, 0.0)
+
         # cauchy cross-entropy loss
         # D = distance(u, dist_type='cosine')
         # E = tf.log(1 + alpha * D)
@@ -190,20 +198,25 @@ def exp_loss(u, label_u, alpha, wordvec=None, balanced=True):
         # loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
 
         ## sigmoid
-        D = distance(u, dist_type='cosine')
-        E = tf.log(1 + tf.exp(-alpha * (1-2*D)))
-        E_m = tf.boolean_mask(E, mask)
-        loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
-
-        ## hyper sigmoid
-        # balanced = False
-        # alpha = 8
-        # belta = 10
-        # gamma = 2
-        # D = gamma * distance(u, dist_type='cosine')
+        # D = distance(u, dist_type='cosine')
         # E = tf.log(1 + tf.exp(-alpha * (1-2*D)))
         # E_m = tf.boolean_mask(E, mask)
-        # loss_1 = belta * S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
+        # loss_1 = S_m * E_m + (1 - S_m) * (E_m - tf.log(tf.exp(E_m) - 1 + 1e-6))
+
+        ## hyper sigmoid
+        balanced = False
+        alpha = 9
+        belta = 20
+        gamma = 1.5
+        margin = 0.25
+        D = gamma * distance(u, dist_type='cosine')
+        E1 = tf.log(1 + tf.exp(-alpha * (1-2*D)))
+        E1_m = tf.boolean_mask(E1, mask)
+        loss_s1 = belta * S_m * E1_m
+        E2 = tf.log(1 + tf.exp(-alpha * (1-2*(D-margin*W))))
+        E2_m = tf.boolean_mask(E2, mask)
+        loss_s0 = (1 - S_m) * (E2_m - tf.log(tf.exp(E2_m) - 1 + 1e-6))
+        loss_1 = loss_s1 + loss_s0
 
         ## post-tune
         # balanced = False
