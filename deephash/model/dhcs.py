@@ -77,6 +77,7 @@ class DHCS(object):
                 from tensorflow.python import debug as tf_debug
                 self.sess = tf_debug.LocalCLIDebugWrapperSession(self.sess)
 
+
     def load_model(self):
         networks = {'alexnet': img_alexnet_layers, 'vgg16': img_vgg16_layers}
         try:
@@ -86,6 +87,7 @@ class DHCS(object):
         except:
             raise Exception('cannot use such CNN model as ' + self.network)
         return img_output
+
 
     def save_model(self, model_file=None):
         if model_file is None:
@@ -100,6 +102,7 @@ class DHCS(object):
         np.save(model_file, np.array(model))
         return
 
+
     def load_codes(self, codes_file=None):
         if codes_file is None:
             codes_file = self.codes_file
@@ -110,6 +113,7 @@ class DHCS(object):
         database = mDataset(codes['db_features'], codes['db_label'])
         query = mDataset(codes['query_features'], codes['query_label'])
         return database, query
+
 
     def save_codes(self, database, query, codes_file=None):
         if codes_file is None:
@@ -123,18 +127,23 @@ class DHCS(object):
         print("saving codes to %s" % codes_file)
         np.save(codes_file, np.array(codes))
 
+
     def apply_loss_function(self, global_step):
         # loss function
-        self.cos_loss = exp_loss(self.img_last_layer, self.img_label, self.alpha, self.wordvec)
+        self.S_loss = exp_loss(self.img_last_layer, self.img_label, self.alpha, self.wordvec)
         self.q_loss = quantization_loss(self.img_last_layer, q_type='L2')
         self.b_loss = balance_loss(self.img_last_layer)
-        self.loss = self.cos_loss + self.q_lambda * self.q_loss +  self.b_lambda * self.b_loss
+        self.i_loss = independence_loss(self.img_last_layer)
+        self.loss = self.cos_loss + self.q_lambda * self.q_loss + \
+                                    self.b_lambda * self.b_loss + \
+                                    self.i_lambda * self.i_loss
 
         # for debug
         tf.summary.scalar('loss', self.loss)
-        tf.summary.scalar('similar_loss', self.cos_loss)
+        tf.summary.scalar('similar_loss', self.S_loss)
         tf.summary.scalar('quantization_loss', self.q_loss)
         tf.summary.scalar('balance_loss', self.b_loss)
+        tf.summary.scalar('independence_loss', self.i_loss)
         self.merged = tf.summary.merge_all()
 
         # Last layer has a 10 times learning rate
@@ -169,7 +178,7 @@ class DHCS(object):
 
             start_time = time.time()
 
-            _, loss, cos_loss, q_loss, output, summary = self.sess.run(
+            _, loss, S_loss, q_loss, output, summary = self.sess.run(
                 [self.train_op, self.loss, self.cos_loss, self.q_loss, self.img_last_layer, self.merged],
                 feed_dict={self.img: images,
                            self.img_label: labels})
@@ -180,13 +189,14 @@ class DHCS(object):
             train_writer.add_summary(summary, train_iter)
             if train_iter % 100 == 0:
                 print("%s #train# step %4d, loss = %.4f, similar loss = %.4f, quantization loss = %.4f, %.1f sec/batch"
-                      % (datetime.now(), train_iter + 1, loss, cos_loss, q_loss, duration))
+                      % (datetime.now(), train_iter + 1, loss, S_loss, q_loss, duration))
 
         print("%s #traing# finish training" % datetime.now())
         self.save_model()
         print("model saved")
 
         self.sess.close()
+
 
     def validation(self, img_database, img_query, R=100):
         if os.path.exists(self.codes_file):

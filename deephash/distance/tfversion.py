@@ -39,6 +39,10 @@ def inner_product(x1, x2):
 def cosine(x1, x2):
     return (1 + inner_product(normed(x1), normed(x2))) / 2
 
+def my_inner_product(x1, x2):
+    K = tf.cast(tf.shape(x1)[-1], tf.float32)
+    return (1 + inner_product(x1, x2) / K) / 2
+
 def my_euclidean(x1, x2):
     K = tf.cast(tf.shape(x1)[-1], tf.float32)
     return euclidean(x1, x2) / tf.sqrt(4 * K)

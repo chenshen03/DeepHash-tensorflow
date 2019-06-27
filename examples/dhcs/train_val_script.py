@@ -23,6 +23,7 @@ def parse_args(argv):
     algorithm_group.add_argument('--bit', type=int, default=32)
     algorithm_group.add_argument('--q-lambda', type=float, default=0.01)
     algorithm_group.add_argument('--b-lambda', type=float, default=0.0)
+    algorithm_group.add_argument('--i-lambda', type=float, default=0.0)
     algorithm_group.add_argument('--alpha', type=float, default=5)
     # network config
     network_group = parser.add_argument_group(title='Network config')
