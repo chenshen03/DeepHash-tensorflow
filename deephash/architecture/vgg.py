@@ -254,16 +254,6 @@ def img_vgg16_layers(img, batch_size, output_dim, stage, model_weights=None, val
         deep_param_img['fc7'] = [fc7w, fc7b]
         train_layers += [fc7w, fc7b]
 
-    # # fc8
-    # with tf.name_scope('fc8') as scope:
-    #     fc8w = tf.Variable(tf.truncated_normal([4096, 1000],
-    #                                                     dtype=tf.float32,
-    #                                       net_data['conv1_1_W'], name='weights')
-    #     fc8b = tf.Variable(tf.constant(1.0, shape=[1000], dtype=tf.float32),
-    #                             trainable=True, name='biases')
-    #     fc8l = tf.nn.bias_add(tf.matmul(fc7, fc8w), fc8b)
-    #     train_layers += [fc8w, fc8b]
-
     # FC8
     # Output output_dim
     with tf.name_scope('fc8'):
@@ -294,5 +284,5 @@ def img_vgg16_layers(img, batch_size, output_dim, stage, model_weights=None, val
         train_layers += [fc8w, fc8b]
 
     print("img model loading finished")
-    # Return outputs
+
     return fc8, deep_param_img, train_layers

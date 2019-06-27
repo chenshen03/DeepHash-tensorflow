@@ -6,7 +6,6 @@ import numpy as np
 def txt_mlp_layers(txt, txt_dim, output_dim, stage, model_weights=None, with_tanh=True):
     deep_param_txt = {}
     train_layers = []
-    train_last_layer = []
 
     if model_weights is None:
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -53,8 +52,8 @@ def txt_mlp_layers(txt, txt_dim, output_dim, stage, model_weights=None, with_tan
             txt_fc2 = txt_fc2l
 
         train_layers += [txt_fc2w, txt_fc2b]
-        train_last_layer += [txt_fc2w, txt_fc2b]
+        train_layers += [txt_fc2w, txt_fc2b]
         deep_param_txt['txt_fc2'] = [txt_fc2w, txt_fc2b]
 
     # return the output of text layer
-    return txt_fc2, deep_param_txt, train_layers, train_last_layer
+    return txt_fc2, deep_param_txt, train_layers
