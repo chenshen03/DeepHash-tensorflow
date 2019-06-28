@@ -1,7 +1,38 @@
 import numpy as np
 
 from distance.npversion import distance
+from scipy.special import comb
 from util import sign
+
+    
+def get_RAMAP(q_output, q_labels, db_output, db_labels, cost=False):
+    ''' 
+    - On the Evaluation Metric for Hashing
+    '''
+    M, Q = q_output.shape
+    R = Q
+    RAAPs = []
+    time_costs = [comb(Q, r) for r in range(Q+1)]
+    distH = distance(q_output, db_output, pair=False, dist_type='hamming')
+    gnds = np.dot(q_labels, db_labels.transpose()) > 0
+    for i in range(M):
+        gnd = gnds[i,:]
+        hamm = distH[i,:]
+        RAAP = 0
+        for r in range(R+1):
+            hamm_r_idx = np.where(hamm<=r)
+            rel = len(hamm_r_idx[0])
+            if(rel == 0):
+                continue
+            imatch = np.sum(gnd[hamm_r_idx])
+            if cost:
+                time_cost = np.sum(time_costs[:r+1])
+                RAAP += (imatch / (rel * time_cost))
+            else:
+                RAAP += (imatch / rel)
+        RAAP = RAAP / (R + 1)
+        RAAPs.append(RAAP)
+    return np.mean(RAAPs)
 
 
 # optimized
@@ -79,6 +110,11 @@ class MAPs:
         q_output = sign(query.output)
         db_output = sign(database.output)
         return get_mAPs(q_output, query.label, db_output, database.label, Rs, dist_type)
+
+    def get_RAMAP_after_sign(self, database, query):
+        q_output = sign(query.output)
+        db_output = sign(database.output)
+        return get_RAMAP(q_output, query.label, db_output, database.label)
 
     def get_mAPs_after_sign_with_feature_rerank(self, database, query, Rs=None, dist_type='inner_product'):
         if Rs is None:

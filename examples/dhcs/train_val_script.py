@@ -80,6 +80,7 @@ def main(config):
         network_weights = model.train(train_img, config)
         config.network_weights = network_weights
 
+    sys.stdout = Logger(os.path.join(config.save_dir, 'test.log'))
     query_img, database_img = dataset.import_validation(data_root, img_te, img_db)
     maps = model.validation(database_img, query_img, config)
 

@@ -42,6 +42,10 @@ def inner_product(x1, x2, pair=False):
 def cosine(x1, x2):
     return (1 + inner_product(normed(x1), normed(x2))) / 2
 
+def hamming(x1, x2):
+    K = x1.shape[1]
+    return (K - np.dot(x1, x2.transpose())) / 2
+
 def distance(x1, x2=None, pair=True, dist_type="euclidean2", ifsign=False):
     '''
     Param:

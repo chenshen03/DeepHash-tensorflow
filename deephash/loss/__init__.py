@@ -372,7 +372,7 @@ def pq_loss(u, h, C, wordvec=None, squared=True):
     return loss
 
 
-'''balance and orthogonal loss
+'''balance and independence loss
 - Deep semantic ranking based hashing for multi-label image retrieval
 - Supervised Learning of Semantics-preserving Hashing via Deep Neural Networks for Large-scale Image Search
 '''
@@ -390,11 +390,11 @@ def balance_loss(u):
     return loss
 
 
-def orthogonal_loss(u):
-    '''orthogonal_loss
+def independence_loss(u):
+    '''independence loss
     - Deep Triplet Quantization
     '''
-    with tf.name_scope('orthogonal_loss'):
+    with tf.name_scope('independence_loss'):
         batch_size = tf.shape(u)[0]
         bit = tf.shape(u)[1]
         H = tf.sign(u)

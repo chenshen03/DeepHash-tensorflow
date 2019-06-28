@@ -31,6 +31,7 @@ class DHCS(object):
         self.n_class = config.label_dim
         self.q_lambda = config.q_lambda
         self.b_lambda = config.b_lambda
+        self.i_lambda = config.i_lambda
         self.alpha = config.alpha
         self.wordvec_dict = config.wordvec_dict
 
@@ -134,9 +135,9 @@ class DHCS(object):
         self.q_loss = quantization_loss(self.img_last_layer, q_type='L2')
         self.b_loss = balance_loss(self.img_last_layer)
         self.i_loss = independence_loss(self.img_last_layer)
-        self.loss = self.cos_loss + self.q_lambda * self.q_loss + \
-                                    self.b_lambda * self.b_loss + \
-                                    self.i_lambda * self.i_loss
+        self.loss = self.S_loss + self.q_lambda * self.q_loss + \
+                                  self.b_lambda * self.b_loss + \
+                                  self.i_lambda * self.i_loss
 
         # for debug
         tf.summary.scalar('loss', self.loss)
@@ -179,7 +180,7 @@ class DHCS(object):
             start_time = time.time()
 
             _, loss, S_loss, q_loss, output, summary = self.sess.run(
-                [self.train_op, self.loss, self.cos_loss, self.q_loss, self.img_last_layer, self.merged],
+                [self.train_op, self.loss, self.S_loss, self.q_loss, self.img_last_layer, self.merged],
                 feed_dict={self.img: images,
                            self.img_label: labels})
 
@@ -208,7 +209,7 @@ class DHCS(object):
             print("%s #validation# totally %d query in %d batches" % (datetime.now(), img_query.n_samples, query_batch))
             for i in range(query_batch):
                 images, labels = img_query.next_batch(self.val_batch_size)
-                output, loss = self.sess.run([self.img_last_layer, self.cos_loss],
+                output, loss = self.sess.run([self.img_last_layer, self.S_loss],
                                             feed_dict={self.img: images, self.img_label: labels, self.stage: 1})
                 img_query.feed_batch_output(self.val_batch_size, output)
                 print('Cosine Loss: %s' % loss)
@@ -219,7 +220,7 @@ class DHCS(object):
             for i in range(database_batch):
                 images, labels = img_database.next_batch(self.val_batch_size)
 
-                output, loss = self.sess.run([self.img_last_layer, self.cos_loss],
+                output, loss = self.sess.run([self.img_last_layer, self.S_loss],
                                             feed_dict={self.img: images, self.img_label: labels, self.stage: 1})
                 img_database.feed_batch_output(self.val_batch_size, output)
                 # print output[:10, :10]
@@ -240,11 +241,12 @@ class DHCS(object):
         mAPs = MAPs(R)
         prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, 2)
         return {
-            'i2i_by_feature': mAPs.get_mAPs_by_feature(img_database, img_query),
-            'i2i_after_sign': mAPs.get_mAPs_after_sign(img_database, img_query),
-            'i2i_map_radius_2': mmap,
-            'i2i_prec_radius_2': prec,
-            'i2i_recall_radius_2': rec
+            'mAP_feature': mAPs.get_mAPs_by_feature(img_database, img_query),
+            'mAP_sign': mAPs.get_mAPs_after_sign(img_database, img_query),
+            'mAP_radius2': mmap,
+            'prec_radius2': prec,
+            'recall_radius2': rec,
+            'RAMAP': mAPs.get_RAMAP_after_sign(img_database, img_query)
         }
 
 
