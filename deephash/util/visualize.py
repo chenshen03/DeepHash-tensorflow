@@ -57,6 +57,8 @@ def plot_distance(db_feats, db_label, query_feats, query_label, path):
 
 
 def plot_tsne(data, label, path, R=2000):
+    if label.shape[1] != 10:
+        return
     label2name = np.array(['airplane', 'automobile', 'bird', 'cat', 'deer', \
                            'dog', 'frog', 'horse', 'ship', 'truck'])
     label2color = np.array([(1,0,0), (0,1,0), (0,0,1), (1,0,1), (1,1,0), \

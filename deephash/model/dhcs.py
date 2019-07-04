@@ -16,8 +16,8 @@ import tensorflow as tf
 from architecture import *
 from loss import *
 from util import *
+from evaluation import *
 from data_provider.pairwise import Dataset
-from evaluation import MAPs
 
 
 class DHCS(object):
@@ -231,22 +231,31 @@ class DHCS(object):
 
         self.sess.close()
 
+        db_feats = img_database.output
+        db_codes = sign(img_database.output)
+        db_labels = img_database.label
+        q_feats = img_query.output
+        q_codes = sign(img_query.output)
+        q_labels = img_query.label
+
         print("visualizing data ...")
-        plot_tsne(sign(img_database.output), img_database.label, self.save_dir)
-        plot_distance(img_database.output, img_database.label, img_query.output, img_query.label, self.save_dir)
-        ratios = plot_distribution(img_database.output, self.save_dir)
+        plot_tsne(np.row_stack((db_codes, q_codes)), np.row_stack((db_labels, q_labels)), self.save_dir)
+        plot_distance(db_feats, db_labels, q_feats, q_labels, self.save_dir)
+        ratios = plot_distribution(db_feats, self.save_dir)
         print(ratios)
 
         print("calculating metrics ...")
         mAPs = MAPs(R)
         prec, rec, mmap = mAPs.get_precision_recall_by_Hamming_Radius(img_database, img_query, 2)
         return {
-            'mAP_feature': mAPs.get_mAPs_by_feature(img_database, img_query),
             'mAP_sign': mAPs.get_mAPs_after_sign(img_database, img_query),
+            'mAP_WhRank': get_whrank_mAP(q_feats, q_codes, q_labels, db_feats, db_codes, db_labels),
+            'mAP_finetune': get_finetune_mAP(q_feats, q_codes, q_labels, db_feats, db_codes, db_labels),
+            'mAP_feat': mAPs.get_mAPs_by_feature(img_database, img_query), 
+            'RAMAP': get_RAMAP(q_codes, q_labels, db_codes, db_labels),
             'mAP_radius2': mmap,
             'prec_radius2': prec,
-            'recall_radius2': rec,
-            'RAMAP': mAPs.get_RAMAP_after_sign(img_database, img_query)
+            'recall_radius2': rec
         }
 
 
