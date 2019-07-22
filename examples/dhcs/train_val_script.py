@@ -31,7 +31,7 @@ def parse_args(argv):
     network_group.add_argument('--max-iter', type=int, default=10000)
     network_group.add_argument('--batch-size', type=int, default=128)
     network_group.add_argument('--val-batch-size', type=int, default=100)
-    network_group.add_argument('--lr', type=float, default=0.001)
+    network_group.add_argument('--lr', type=float, default=0.0001)
     network_group.add_argument('--lr-decay-factor', type=float, default=0.5)
     network_group.add_argument('--decay-step', type=int, default=3000)
     network_group.add_argument('--network', type=str, default='alexnet')
@@ -74,6 +74,7 @@ def main(config):
     img_db = f'{data_root}/database.txt'
 
     if config.test == True:
+        # config.save_dir = '../snapshot/cifar10_alexnet_32bit_hyper_sigmoid/debug'
         config.network_weights = os.path.join(config.save_dir, 'network_weights.npy')
     else:
         train_img = dataset.import_train(data_root, img_tr)
