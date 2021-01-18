@@ -3,7 +3,7 @@
 This code repository is derived from [thulab/DeepHash](https://github.com/thulab/DeepHash) but adds more features.
 See the commit and update logs for details.
 
-# Update logs:
+## Update logs:
 - Metrics
     - add WhRank
     - add mAP_finetune
@@ -13,18 +13,22 @@ See the commit and update logs for details.
 - Loss functions
     - add Independent loss
     - add balance loss 
-    - add add orthogonal loss
+    - add orthogonal loss
     - add exp loss
     - add quantization losses, *i.e.*, L1 loss、L2 loss、cauchy loss
     - 
 - Tools
-    - add visualization tool such as T-SNE, *etc*.
+    - add visualization tool such as T-SNE, *etc*
     - add distance libs
 - Others
     - refactoring the `data_provider` code
     - refactoring the `model` code
     - refactoring `parser`  code
     - training acceleration
+
+## Contacts
+Maintainers of this library:
+* Shen Chen, Email: chenshen@stu.xmu.edu.cn
 
 ---
 DeepHash is a lightweight deep learning to hash library that implements state-of-the-art deep hashing/quantization algorithms. We will implement more representative deep hashing models continuously according to our released [deep hashing paper list](https://github.com/caoyue10/DeepHashingBaselines). Specifically, we welcome other researchers to contribute deep hashing models into this toolkit based on our framework. We will announce the contribution in this project.
@@ -140,7 +144,3 @@ If you find *DeepHash* is useful for your research, please consider citing the f
       journal={MM, ACM},
       year={2018}
     }
-
-## Contacts
-Maintainers of this library:
-* Shen Chen, Email: chenshen@stu.xmu.edu.cn
