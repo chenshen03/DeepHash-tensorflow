@@ -1,7 +1,8 @@
 # DeepHash-tensorflow
 
 This code repository is derived from [thulab/DeepHash](https://github.com/thulab/DeepHash) but adds more features.
-See the commit and update logs for details.
+
+See the commits and update logs for details.
 
 ## Update logs:
 - Metrics
@@ -16,7 +17,6 @@ See the commit and update logs for details.
     - add orthogonal loss
     - add exp loss
     - add quantization losses, *i.e.*, L1 loss、L2 loss、cauchy loss
-    - 
 - Tools
     - add visualization tool such as T-SNE, *etc*
     - add distance libs
