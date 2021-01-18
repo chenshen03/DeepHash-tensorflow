@@ -1,5 +1,32 @@
-# DeepHash
+# DeepHash-tensorflow
 
+This code repository is derived from [thulab/DeepHash](https://github.com/thulab/DeepHash) but adds more features.
+See the commit and update logs for details.
+
+# Update logs:
+- Metrics
+    - add WhRank
+    - add mAP_finetune
+    - add RAMAP
+- Backbone
+    - add VGG-F network
+- Loss functions
+    - add Independent loss
+    - add balance loss 
+    - add add orthogonal loss
+    - add exp loss
+    - add quantization losses, *i.e.*, L1 loss、L2 loss、cauchy loss
+    - 
+- Tools
+    - add visualization tool such as T-SNE, *etc*.
+    - add distance libs
+- Others
+    - refactoring the `data_provider` code
+    - refactoring the `model` code
+    - refactoring `parser`  code
+    - training acceleration
+
+---
 DeepHash is a lightweight deep learning to hash library that implements state-of-the-art deep hashing/quantization algorithms. We will implement more representative deep hashing models continuously according to our released [deep hashing paper list](https://github.com/caoyue10/DeepHashingBaselines). Specifically, we welcome other researchers to contribute deep hashing models into this toolkit based on our framework. We will announce the contribution in this project.
 
 The implemented models include: 
@@ -115,6 +142,5 @@ If you find *DeepHash* is useful for your research, please consider citing the f
     }
 
 ## Contacts
-Maintainers of  this library:
-* Yue Cao, Email: caoyue10@gmail.com
-* Bin Liu, Email: liubinthss@gmail.com
+Maintainers of this library:
+* Shen Chen, Email: chenshen@stu.xmu.edu.cn
